@@ -30,7 +30,6 @@
     "no-console": "off",
 
     "import/newline-after-import": ["error", { "count": 1 }],
-    "import/extensions": ["error", "always"],
     "import/no-unresolved": ["error", { "commonjs": true, "amd": true }],
     "import/export": "error",
     "import/namespace": "off",
