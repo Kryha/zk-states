@@ -91,7 +91,7 @@ function createCommonJSConfig(input, output, options) {
             ...Object.entries(options.addModuleExport)
               .filter(([key]) => key !== "default")
               .map(([key, value]) => `module.exports.${key} = ${value};`),
-            `exports.default = module.exports;`,
+            "exports.default = module.exports;",
           ].join("\n")
         : "",
     },
@@ -166,16 +166,10 @@ function createSystemConfig(input, output, env) {
   };
 }
 
-module.exports = function (args) {
-  let c = Object.keys(args).find((key) => key.startsWith("config-"));
-  if (c) {
-    throw new Error("Multiple configurations are currently not supported.");
-  } else {
-    c = "index";
-  }
+module.exports = function () {
   return [
-    ...(c === "index" ? [createDeclarationConfig(`src/${c}.ts`, "dist")] : []),
-    createCommonJSConfig(`src/${c}.ts`, `dist/${c}`, {
+    createDeclarationConfig("src/index.ts", "dist"),
+    createCommonJSConfig("src/index.ts", "dist/index", {
       addModuleExport: {
         index: {
           default: "react",
@@ -183,14 +177,14 @@ module.exports = function (args) {
           useStore: "useStore",
           createStore: "vanilla.createStore",
         },
-      }[c],
+      }["index"],
     }),
-    createESMConfig(`src/${c}.ts`, `dist/esm/${c}.js`),
-    createESMConfig(`src/${c}.ts`, `dist/esm/${c}.mjs`),
-    createUMDConfig(`src/${c}.ts`, `dist/umd/${c}`, "development"),
-    createUMDConfig(`src/${c}.ts`, `dist/umd/${c}`, "production"),
-    createSystemConfig(`src/${c}.ts`, `dist/system/${c}`, "development"),
-    createSystemConfig(`src/${c}.ts`, `dist/system/${c}`, "production"),
+    createESMConfig("src/index.ts", "dist/esm/index.js"),
+    createESMConfig("src/index.ts", "dist/esm/index.mjs"),
+    createUMDConfig("src/index.ts", "dist/umd/index", "development"),
+    createUMDConfig("src/index.ts", "dist/umd/index", "production"),
+    createSystemConfig("src/index.ts", "dist/system/index", "development"),
+    createSystemConfig("src/index.ts", "dist/system/index", "production"),
   ];
 };
 
