@@ -1,25 +1,14 @@
-import { expect, it } from "vitest";
-import { create } from "zk-state";
+import { render } from "@testing-library/react";
+import { it } from "vitest";
+import { useMyStore } from "zk-state";
 
-it("creates a store hook and api object", () => {
-  let params;
-  const result = create((...args) => {
-    params = args;
-    return { value: null };
-  });
-  expect({ params, result }).toMatchInlineSnapshot(`
-      {
-        "params": [
-          [Function],
-          [Function],
-          {
-            "destroy": [Function],
-            "getState": [Function],
-            "setState": [Function],
-            "subscribe": [Function],
-          },
-        ],
-        "result": [Function],
-      }
-    `);
+it("checks value of num", async () => {
+  const Component = () => {
+    const num = useMyStore((state) => state.num);
+    return <div>num: {num}</div>;
+  };
+
+  const { findByText } = render(<Component />);
+
+  await findByText("num: 1");
 });
