@@ -6,7 +6,7 @@ const replace = require("@rollup/plugin-replace");
 const terser = require("@rollup/plugin-terser");
 const typescript = require("@rollup/plugin-typescript");
 const { default: esbuild } = require("rollup-plugin-esbuild");
-const createBabelConfig = require("./babel.config.js");
+const createBabelConfig = require("./babel.config");
 
 const extensions = [".js", ".ts", ".tsx"];
 const { root } = path.parse(process.cwd());
