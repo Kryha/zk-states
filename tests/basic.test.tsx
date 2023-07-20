@@ -1,5 +1,5 @@
+import { expect, it } from "vitest";
 import { create } from "zk-state";
-import { it, expect } from "vitest";
 
 it("creates a store hook and api object", () => {
   let params;

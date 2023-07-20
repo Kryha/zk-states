@@ -1,32 +1,75 @@
 {
   "env": {
     "browser": true,
-    "es2021": true
+    "shared-node-browser": true,
+    "node": true,
+    "es6": true
   },
   "extends": [
     "eslint:recommended",
-    "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:import/recommended",
-    "plugin:vitest/recommended",
-    "prettier"
+    "prettier",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:import/recommended"
   ],
+  "plugins": ["react", "@typescript-eslint", "react-hooks", "vitest", "import"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
     },
-    "ecmaVersion": 12,
+    "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": ["react", "@typescript-eslint", "react-hooks", "vitest"],
   "rules": {
+    "eqeqeq": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "curly": ["warn", "multi-line", "consistent"],
+    "no-console": "off",
+
+    "import/newline-after-import": ["error", { "count": 1 }],
+    "import/extensions": ["error", "always"],
+    "import/no-unresolved": ["error", { "commonjs": true, "amd": true }],
+    "import/export": "error",
+    "import/namespace": "off",
+    "import/named": "off",
+    "import/order": [
+      "error",
+      {
+        "alphabetize": { "order": "asc", "caseInsensitive": true },
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index",
+          "object"
+        ],
+        "newlines-between": "never",
+        "pathGroups": [
+          {
+            "pattern": "react",
+            "group": "builtin",
+            "position": "before"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": ["builtin"]
+      }
+    ],
+    "sort-imports": [
+      "error",
+      {
+        "ignoreDeclarationSort": true
+      }
+    ],
+
     "indent": ["warn", 2, { "SwitchCase": 1 }],
     "linebreak-style": ["error", "unix"],
     "quotes": ["error", "double"],
     "semi": ["error", "always"],
-
-    "react/react-in-jsx-scope": "off",
 
     "@typescript-eslint/no-unused-vars": [
       "warn",
@@ -39,16 +82,25 @@
     "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/explicit-module-boundary-types": "off",
 
+    "react/react-in-jsx-scope": "off",
+
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "error",
 
-    "import/newline-after-import": ["error", { "count": 1 }]
+    "vitest/consistent-test-it": [
+      "error",
+      { "fn": "it", "withinDescribe": "it" }
+    ]
   },
   "ignorePatterns": ["**/*.umd.js", "**/generated/*"],
   "settings": {
     "import/resolver": {
-      "node": {
-        "extensions": [".ts", ".tsx", ".js"]
+      "alias": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"],
+        "map": [
+          ["^zk-state$", "./src/index.ts"],
+          ["zk-state", "./src"]
+        ]
       }
     },
     "react": {
