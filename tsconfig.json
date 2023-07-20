@@ -10,8 +10,8 @@
     "exactOptionalPropertyTypes": true,
     "baseUrl": ".",
     "paths": {
-      "zustand": ["./src/index.ts"],
-      "zustand/*": ["./src/*.ts"]
+      "zk-state": ["./src/index.ts"],
+      "zk-state/*": ["./src/*.ts"]
     }
   },
   "include": ["src/**/*", "tests/**/*"],

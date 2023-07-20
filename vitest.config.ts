@@ -4,12 +4,12 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: [
-      { find: /^zustand$/, replacement: "./src/index.ts" },
-      { find: /^zustand(.*)$/, replacement: "./src/$1.ts" },
+      { find: /^zk-state$/, replacement: "./src/index.ts" },
+      { find: /^zk-state(.*)$/, replacement: "./src/$1.ts" },
     ],
   },
   test: {
-    name: "zustand",
+    name: "zk-state",
     // Keeping globals to true triggers React Testing Library's auto cleanup
     // https://vitest.dev/guide/migration.html
     globals: true,

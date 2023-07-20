@@ -10,7 +10,7 @@ const createBabelConfig = require("./babel.config.js");
 
 const extensions = [".js", ".ts", ".tsx"];
 const { root } = path.parse(process.cwd());
-const entries = [{ find: /.*\/vanilla\.ts$/, replacement: "zustand/vanilla" }];
+const entries = [{ find: /.*\/vanilla\.ts$/, replacement: "zk-state/vanilla" }];
 
 function external(id) {
   return !id.startsWith(".") && !id.startsWith(root);
@@ -110,7 +110,7 @@ function createCommonJSConfig(input, output, options) {
 }
 
 function createUMDConfig(input, output, env) {
-  let name = "zustand";
+  let name = "zk-state";
   const fileName = output.slice("dist/umd/".length);
   const capitalize = (s) => s.slice(0, 1).toUpperCase() + s.slice(1);
   if (fileName !== "index") {
@@ -128,7 +128,6 @@ function createUMDConfig(input, output, env) {
         // FIXME not yet supported
         "use-sync-external-store/shim/with-selector":
           "useSyncExternalStoreShimWithSelector",
-        "zustand/vanilla": "zustandVanilla",
       },
     },
     external,
