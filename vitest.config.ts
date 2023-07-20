@@ -1,6 +1,5 @@
 import { defineConfig } from "vitest/config";
 
-// TODO: customise
 export default defineConfig({
   resolve: {
     alias: [
