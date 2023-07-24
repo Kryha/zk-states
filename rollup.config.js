@@ -1,12 +1,9 @@
 const path = require("path");
 const alias = require("@rollup/plugin-alias");
-const babelPlugin = require("@rollup/plugin-babel");
 const resolve = require("@rollup/plugin-node-resolve");
 const replace = require("@rollup/plugin-replace");
-const terser = require("@rollup/plugin-terser");
 const typescript = require("@rollup/plugin-typescript");
 const { default: esbuild } = require("rollup-plugin-esbuild");
-const createBabelConfig = require("./babel.config");
 
 const extensions = [".js", ".ts", ".tsx"];
 const { root } = path.parse(process.cwd());
@@ -14,15 +11,6 @@ const entries = [{ find: /.*\/vanilla\.ts$/, replacement: "zk-state/vanilla" }];
 
 function external(id) {
   return !id.startsWith(".") && !id.startsWith(root);
-}
-
-function getBabelOptions(targets) {
-  return {
-    ...createBabelConfig({ env: (env) => env === "build" }, targets),
-    extensions,
-    comments: false,
-    babelHelpers: "bundled",
-  };
 }
 
 function getEsbuild(target, env = "development") {
@@ -78,113 +66,11 @@ function createESMConfig(input, output) {
   };
 }
 
-function createCommonJSConfig(input, output, options) {
-  return {
-    input,
-    output: {
-      file: `${output}.js`,
-      format: "cjs",
-      esModule: false,
-      outro: options.addModuleExport
-        ? [
-            `module.exports = ${options.addModuleExport.default};`,
-            ...Object.entries(options.addModuleExport)
-              .filter(([key]) => key !== "default")
-              .map(([key, value]) => `module.exports.${key} = ${value};`),
-            "exports.default = module.exports;",
-          ].join("\n")
-        : "",
-    },
-    external,
-    plugins: [
-      alias({ entries: entries.filter((e) => !e.find.test(input)) }),
-      resolve({ extensions }),
-      replace({
-        "import.meta.env?.MODE": "process.env.NODE_ENV",
-        delimiters: ["\\b", "\\b(?!(\\.|/))"],
-        preventAssignment: true,
-      }),
-      babelPlugin(getBabelOptions({ ie: 11 })),
-    ],
-  };
-}
-
-function createUMDConfig(input, output, env) {
-  let name = "zk-state";
-  const fileName = output.slice("dist/umd/".length);
-  const capitalize = (s) => s.slice(0, 1).toUpperCase() + s.slice(1);
-  if (fileName !== "index") {
-    name += fileName.replace(/(\w+)\W*/g, (_, p) => capitalize(p));
-  }
-  return {
-    input,
-    output: {
-      file: `${output}.${env}.js`,
-      format: "umd",
-      name,
-      globals: {
-        react: "React",
-        immer: "immer",
-        // FIXME not yet supported
-        "use-sync-external-store/shim/with-selector":
-          "useSyncExternalStoreShimWithSelector",
-      },
-    },
-    external,
-    plugins: [
-      alias({ entries: entries.filter((e) => !e.find.test(input)) }),
-      resolve({ extensions }),
-      replace({
-        "import.meta.env?.MODE": JSON.stringify(env),
-        delimiters: ["\\b", "\\b(?!(\\.|/))"],
-        preventAssignment: true,
-      }),
-      babelPlugin(getBabelOptions({ ie: 11 })),
-      ...(env === "production" ? [terser()] : []),
-    ],
-  };
-}
-
-function createSystemConfig(input, output, env) {
-  return {
-    input,
-    output: {
-      file: `${output}.${env}.js`,
-      format: "system",
-    },
-    external,
-    plugins: [
-      alias({ entries: entries.filter((e) => !e.find.test(input)) }),
-      resolve({ extensions }),
-      replace({
-        "import.meta.env?.MODE": JSON.stringify(env),
-        delimiters: ["\\b", "\\b(?!(\\.|/))"],
-        preventAssignment: true,
-      }),
-      getEsbuild("node12", env),
-    ],
-  };
-}
-
 module.exports = function () {
   return [
     createDeclarationConfig("src/index.ts", "dist"),
-    createCommonJSConfig("src/index.ts", "dist/index", {
-      addModuleExport: {
-        index: {
-          default: "react",
-          create: "create",
-          useStore: "useStore",
-          createStore: "vanilla.createStore",
-        },
-      }["index"],
-    }),
     createESMConfig("src/index.ts", "dist/esm/index.js"),
     createESMConfig("src/index.ts", "dist/esm/index.mjs"),
-    createUMDConfig("src/index.ts", "dist/umd/index", "development"),
-    createUMDConfig("src/index.ts", "dist/umd/index", "production"),
-    createSystemConfig("src/index.ts", "dist/system/index", "development"),
-    createSystemConfig("src/index.ts", "dist/system/index", "production"),
   ];
 };
 

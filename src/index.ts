@@ -1,5 +1,6 @@
-import { create } from "zustand";
+import { SmartContract } from "snarkyjs";
 
-export const useMyStore = create(() => ({
-  num: 1,
-}));
+export const createZKState = (contract: SmartContract) => {
+  console.log("createZKState:", contract.address);
+  return contract.address;
+};
