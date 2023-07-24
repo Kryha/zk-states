@@ -13,7 +13,7 @@
     "plugin:react-hooks/recommended",
     "plugin:import/recommended"
   ],
-  "plugins": ["react", "@typescript-eslint", "react-hooks", "vitest", "import"],
+  "plugins": ["react", "@typescript-eslint", "react-hooks", "import"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
@@ -80,16 +80,12 @@
     ],
     "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/consistent-type-imports": "error",
 
     "react/react-in-jsx-scope": "off",
 
     "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "error",
-
-    "vitest/consistent-test-it": [
-      "error",
-      { "fn": "it", "withinDescribe": "it" }
-    ]
+    "react-hooks/exhaustive-deps": "error"
   },
   "ignorePatterns": ["**/*.umd.js", "**/generated/*"],
   "settings": {
