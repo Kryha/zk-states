@@ -1,21 +1,24 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "strict": true,
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "module": "esnext",
     "moduleResolution": "node",
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "target": "ESnext",
+    "module": "ESNext",
+    "jsx": "react",
+    "lib": ["DOM", "ESNext"],
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": false,
     "baseUrl": ".",
+    "outDir": "dist",
+    "declaration": true,
+    "emitDeclarationOnly": true,
     "paths": {
-      "zk-state": ["./src/index.ts"],
-      "zk-state/*": ["./src/*.ts"]
+      "zk-states": ["./src/index.ts"],
+      "zk-states/*": ["./src/*.ts"]
     }
   },
   "include": ["src/**/*", "tests/**/*"],
