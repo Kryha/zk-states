@@ -3,7 +3,7 @@
   "packageManager": "yarn@3.6.1",
   "private": true,
   "version": "0.0.1",
-  "description": "Global React state management with ZK support",
+  "description": "Verifiable state manager for React based on SnarkyJS & Mina protocol",
   "typesVersions": {
     "<4.0": {
       "esm/*": [
