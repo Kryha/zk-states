@@ -6,12 +6,12 @@ export default defineConfig({
   plugins: [wasm(), topLevelAwait()],
   resolve: {
     alias: [
-      { find: /^zk-state$/, replacement: "./src/index.ts" },
-      { find: /^zk-state(.*)$/, replacement: "./src/$1.ts" },
+      { find: /^zk-states$/, replacement: "./src/index.ts" },
+      { find: /^zk-states(.*)$/, replacement: "./src/$1.ts" },
     ],
   },
   test: {
-    name: "zk-state",
+    name: "zk-states",
     // Keeping globals to true triggers React Testing Library's auto cleanup
     // https://vitest.dev/guide/migration.html
     globals: true,

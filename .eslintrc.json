@@ -97,8 +97,8 @@
       "alias": {
         "extensions": [".js", ".jsx", ".ts", ".tsx"],
         "map": [
-          ["^zk-state$", "./src/index.ts"],
-          ["zk-state", "./src"]
+          ["^zk-states$", "./src/index.ts"],
+          ["zk-states", "./src"]
         ]
       }
     },

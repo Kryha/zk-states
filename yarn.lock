@@ -5255,9 +5255,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zk-state@workspace:.":
+"zk-states@workspace:.":
   version: 0.0.0-use.local
-  resolution: "zk-state@workspace:."
+  resolution: "zk-states@workspace:."
   dependencies:
     "@rollup/plugin-commonjs": ^25.0.3
     "@rollup/plugin-node-resolve": ^15.1.0
