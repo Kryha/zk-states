@@ -71,7 +71,7 @@ Before you submit your Pull Request (PR) consider the following guidelines:
 
 1. Search [GitHub](https://github.com/Kryha/zk-states/pulls) for an open or closed PR
    that relates to your submission. You don't want to duplicate effort.
-2. Fork the Kryha/boloney repo.
+2. Fork the Kryha/zk-states repo.
 3. Make your changes in a new git branch:
 
    ```shell
@@ -98,7 +98,7 @@ Before you submit your Pull Request (PR) consider the following guidelines:
    git push origin fix/my-fix-branch
    ```
 
-9. In GitHub, send a pull request to `boloney:develop`.
+9. In GitHub, send a pull request to `zk-states:develop`.
 
 - If we suggest changes then:
 
@@ -241,4 +241,4 @@ reference GitHub issues that this commit **Closes**.
 <hr>
 
 [readme]: https://github.com/Kryha/zk-states/blob/develop/README.md
-[github]: https://github.com/Kryha/boloney
+[github]: https://github.com/Kryha/zk-states
