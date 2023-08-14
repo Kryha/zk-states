@@ -6,7 +6,7 @@ import {
   type ZkappWorkerRequest,
 } from "./zkAppWorker";
 
-class ZkAppWorkerClient {
+export class ZkAppWorkerClient {
   worker: Worker;
 
   promises: {
@@ -20,22 +20,17 @@ class ZkAppWorkerClient {
 
   latestProof: JsonProof | undefined;
 
-  constructor() {
-    this.worker = new Worker(new URL("./zkappWorker.ts", import.meta.url));
+  constructor(worker: Worker) {
+    this.worker = worker;
     this.promises = {};
     this.nextId = 0;
 
     this.worker.onmessage = (event: MessageEvent<ZkappWorkerReponse>) => {
       switch (event.data.resType) {
-        case "function-call": {
-          const nextPromise = this.promises[event.data.id];
-          if (!nextPromise) return;
-
-          nextPromise.resolve(event.data.data);
+        case "function-call":
+          this.promises[event.data.id].resolve(event.data.data);
           delete this.promises[event.data.id];
           break;
-        }
-
         case "proof-update":
           this.latestProof = event.data.data as JsonProof | undefined;
           break;
@@ -78,5 +73,3 @@ class ZkAppWorkerClient {
     await this.call("transitionState", args);
   }
 }
-
-export const zkAppWorkerClient = new ZkAppWorkerClient();

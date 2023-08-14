@@ -62,14 +62,14 @@ const generateStateUpdate =
 
     const witness = new MerkleWitness20(state.tree.getWitness(leafIndex));
 
-    console.info("creating update proof...");
+    console.info("[zk-states worker] creating update proof...");
     const proof = await StateTracker.update(
       state.tree.getRoot(),
       prevProof,
       newStateCircuit,
       witness,
     );
-    console.info("update proof generated:", proof.toJSON());
+    console.info("[zk-states worker] update proof generated:", proof.toJSON());
 
     return proof;
   };
@@ -80,10 +80,10 @@ const workerFunctions = {
   },
 
   init: async (_args: unknown): Promise<TransitionRes> => {
-    console.info("compiling program...");
+    console.info("[zk-states worker] compiling program...");
     // TODO: check if we can cache the compiled program
     await StateTracker.compile();
-    console.info("program compiled");
+    console.info("[zk-states worker] program compiled");
 
     const initialStateCircuit = CircuitString.fromString(INITIAL_STATE);
 
@@ -98,7 +98,7 @@ const workerFunctions = {
       state.tree.getWitness(state.transitionIndex),
     );
 
-    console.info("creating init proof...");
+    console.info("[zk-states worker] creating init proof...");
     const creationProof = await StateTracker.create(
       state.tree.getRoot(),
       initialStateCircuit,
@@ -106,7 +106,7 @@ const workerFunctions = {
     );
     state.latestProof = creationProof;
 
-    console.info("init done");
+    console.info("[zk-states worker] init done");
 
     return { proof: creationProof.toJSON() };
   },
@@ -136,10 +136,11 @@ export interface ZkappWorkerReponse {
   data: unknown;
 }
 
-if (typeof window !== "undefined") {
+export const initZKWorker = () => {
+  console.info("[zk-states worker] adding event listener");
+
   addEventListener(
     "message",
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     async (event: MessageEvent<ZkappWorkerRequest>) => {
       try {
         const returnData = await workerFunctions[event.data.fn](
@@ -158,5 +159,5 @@ if (typeof window !== "undefined") {
     },
   );
 
-  console.info("Added worker service listener.");
-}
+  console.info("[zk-states worker] added worker service listener.");
+};

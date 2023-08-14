@@ -12,15 +12,15 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "noEmit": false,
-    "baseUrl": ".",
+    "baseUrl": "src",
     "outDir": "dist",
     "declaration": true,
     "emitDeclarationOnly": true,
     "paths": {
-      "zk-states": ["./src/index.ts"],
-      "zk-states/*": ["./src/*.ts"]
+      "zk-states": ["./index.ts"],
+      "zk-states/*": ["./*.ts"]
     }
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
