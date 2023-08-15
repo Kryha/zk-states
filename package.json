@@ -1,7 +1,6 @@
 {
   "name": "zk-states",
   "packageManager": "yarn@3.6.1",
-  "private": true,
   "version": "0.0.1",
   "description": "Verifiable state manager for React based on SnarkyJS & Mina protocol",
   "typesVersions": {
@@ -22,7 +21,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "yarn build:js && yarn build:types",
+    "build": "yarn clean && yarn build:js && yarn build:types",
     "build:js": "rollup -c",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "prettier": "prettier \"*.{js,json,md}\" \"{examples,src,tests,docs}/**/*.{js,jsx,ts,tsx,md,mdx}\" --write",
@@ -87,10 +86,10 @@
     "zustand": "^4.3.9"
   },
   "peerDependencies": {
-    "react": ">=18.12.0",
-    "react-dom": ">=18.12.0",
-    "snarkyjs": ">=0.12.1",
-    "zod": ">=3.21.4",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "snarkyjs": ">=0.11.0",
+    "zod": ">=3.21.0",
     "zustand": ">=4.3.9"
   }
 }

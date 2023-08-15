@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { type StateCreator, create } from "zustand";
 import { useContractStore } from "./store";
 import { INITIAL_STATE, wait } from "./utils";
-import { zkAppWorkerClient } from "./zkAppWorkerClient";
+import { ZkAppWorkerClient } from "./zkAppWorkerClient";
 
 let oldState = INITIAL_STATE;
 
@@ -20,9 +20,11 @@ const stringifyState = (state: object) => {
 };
 
 export const createZKState = <T extends object>(
+  worker: Worker,
   createState: StateCreator<T, [], []>,
 ) => {
   const useZKStore = create<T>(createState);
+  const zkAppWorkerClient = new ZkAppWorkerClient(worker);
 
   const useInitZkStore = () => {
     const isInitialized = useContractStore((state) => state.isInitialized);
