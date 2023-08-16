@@ -11,8 +11,51 @@ npm install zk-states
 # using yarn
 yarn add zk-states
 ```
+
+## Defining a ZK state
+
+`zk-states` requires a web worker in order to execute the heaviest ZK computations. Define a file where the web worker code will run, here we will name it `zkStatesWorker.ts`, but you can use whatever name you prefer. The content of your file should look like this:
+
+```ts
+import { initZKWorker } from "zk-states";
+
+initZKWorker();
+```
+
+That's it for the worker file!
+
+To define a ZK state, you simply need to call `createZKState`. Here is an example:
+
+```ts
+interface ZKState {
+  num: number;
+  incNum: () => void;
+}
+
+const { useInitZkStore, useZKStore, useGetLatestProof } =
+  createZKState<ZKState>(
+    // replace './zkStatesWorker.ts` with the path to the previously defined web worker
+    new Worker(new URL("./zkStatesWorker.ts", import.meta.url),{
+        type:"module",
+    }),
+
+    // zustand state definition https://github.com/pmndrs/zustand
+    (set) => ({
+      num: 0,
+      incNum: () =>
+        set((state) => {
+          if (state.num >= 5) return {};
+
+          return {
+            num: state.num + 1,
+          };
+        }),
+    })
+  );
+```
+
 ## Configuring your project
-To enable SnarkyJS for the web, we must set the COOP and COEP headers. when using a Vite porject we also need to install a plugin to enable topLevelAwait for the webworker.
+To enable SnarkyJS for the web, we must set the COOP and COEP headers. when using a Vite project we also need to install a plugin to enable topLevelAwait for the webworker.
 
 ### Next.js
 open the `next.config.js` file and make sure you add these two configs.
@@ -78,46 +121,5 @@ export default defineConfig({
 });
 ```
 
-## Defining a ZK state
-
-`zk-states` requires a web worker in order to execute the heaviest ZK computations. Define a file where the web worker code will run, here we will name it `zkStatesWorker.ts`, but you can use whatever name you prefer. The content of your file should look like this:
-
-```ts
-import { initZKWorker } from "zk-states";
-
-initZKWorker();
-```
-
-That's it for the worker file!
-
-To define a ZK state, you simply need to call `createZKState`. Here is an example:
-
-```ts
-interface ZKState {
-  num: number;
-  incNum: () => void;
-}
-
-const { useInitZkStore, useZKStore, useGetLatestProof } =
-  createZKState<ZKState>(
-    // replace './zkStatesWorker.ts` with the path to the previously defined web worker
-    new Worker(new URL("./zkStatesWorker.ts", import.meta.url),{
-        type:"module",
-    }),
-
-    // zustand state definition https://github.com/pmndrs/zustand
-    (set) => ({
-      num: 0,
-      incNum: () =>
-        set((state) => {
-          if (state.num >= 5) return {};
-
-          return {
-            num: state.num + 1,
-          };
-        }),
-    })
-  );
-```
 
 <!-- TODO: properly document functions -->
