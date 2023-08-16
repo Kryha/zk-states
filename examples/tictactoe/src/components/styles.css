@@ -1,0 +1,68 @@
+.gameboard {
+  width: 300px;
+  height: 300px;
+  background-color: rgb(0, 0, 0);
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  display: flex;
+}
+
+.boardRow:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.square {
+  width: 100px;
+  height: 100px;
+  background-color: white;
+  border: solid 1px black;
+  box-sizing: border-box;
+  border-radius: 5%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.circle {
+  height: 85px;
+  width: 85px;
+  border-radius: 50%;
+  border: solid 15px rgb(27, 48, 61);
+  box-sizing: border-box;
+}
+
+.cross {
+  height: 80px;
+  width: 80px;
+  position: relative;
+}
+
+.cross::before, .cross::after {
+  content: "";
+  position: absolute;
+  background-color: darkred;
+  transform: rotate(45deg);
+}
+
+.cross::before {
+  left: 50%;
+  width: 30%;
+  margin-left: -15%;
+  height: 100%;
+}
+
+.cross::after {
+  top: 50%;
+  height: 30%;
+  margin-top: -15%;
+  width: 100%;
+}
+
+.buttonWrapper canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
