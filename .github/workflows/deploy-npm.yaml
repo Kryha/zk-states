@@ -1,12 +1,8 @@
 name: Publish Package to NPM
 
-# on:
-#   release:
-#     types: [published]
-
 on:
-  push:
-    branches: [fix/publish-npm]
+  release:
+    types: [published]
 
 jobs:
   build:
