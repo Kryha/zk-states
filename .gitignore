@@ -17,3 +17,5 @@ $RECYCLE.BIN/
 package-lock.json
 coverage/
 .rpt2_cache/
+
+.env
