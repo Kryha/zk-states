@@ -26,4 +26,4 @@ jobs:
       - run: yarn config set npmAuthToken $NODE_AUTH_TOKEN
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: yarn npm publish --access public --tolerate-republish
+      - run: yarn npm publish --access public
