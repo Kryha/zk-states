@@ -1,13 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import topLevelAwait from "vite-plugin-top-level-await";
-import { resolve } from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  resolve: {
-    alias: { snarkyjs: resolve("node_modules/snarkyjs") },
-  },
   plugins: [
     react(),
     topLevelAwait(),

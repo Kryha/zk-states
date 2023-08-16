@@ -7,7 +7,6 @@ export default function TicTacToe() {
   const { jumpTo, playerTurn, status } = usePlayerturn();
   const history = useStore((state) => state.history);
   const board = useZKStore((state) => state.board);
-  
 
   useInitZkStore();
 
