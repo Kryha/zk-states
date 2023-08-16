@@ -15,7 +15,7 @@ const stringifyState = <T extends object>(state: T, toProof: (keyof T)[]) => {
   });
 
   const payload = JSON.stringify(stateVariables);
-  console.log("payload", {payload});
+
   return payload;
 };
 
