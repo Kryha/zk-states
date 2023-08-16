@@ -6,22 +6,23 @@ import { ZkAppWorkerClient } from "./zkAppWorkerClient";
 
 let oldState = INITIAL_STATE;
 
-const stringifyState = (state: object) => {
+const stringifyState = <T extends object>(state: T, toProof: (keyof T)[]) => {
   const stateVariables: Record<string, unknown> = {};
   Object.entries(state).forEach(([key, value]) => {
-    if (typeof value !== "function") {
+    if (typeof value !== "function" && toProof.includes(key as keyof T)) {
       stateVariables[key] = value;
     }
   });
 
   const payload = JSON.stringify(stateVariables);
-
+  console.log("payload", {payload});
   return payload;
 };
 
 export const createZKState = <T extends object>(
   worker: Worker,
   createState: StateCreator<T, [], []>,
+  toProof: (keyof T)[],
 ) => {
   const useZKStore = create<T>(createState);
   const zkAppWorkerClient = new ZkAppWorkerClient(worker);
@@ -55,7 +56,7 @@ export const createZKState = <T extends object>(
     useEffect(() => {
       if (!isInitialized) return;
 
-      const newState = stringifyState(state);
+      const newState = stringifyState<T>(state, toProof);
 
       if (newState === oldState) return;
 
