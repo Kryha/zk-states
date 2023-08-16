@@ -11,6 +11,72 @@ npm install zk-states
 # using yarn
 yarn add zk-states
 ```
+## Configuring your project
+To enable SnarkyJS for the web, we must set the COOP and COEP headers. when using a Vite porject we also need to install a plugin to enable topLevelAwait for the webworker.
+
+### Next.js
+open the `next.config.js` file and make sure you add these two configs.
+
+```ts
+const nextConfig = {
+ webpack(config) {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      snarkyjs: require('path').resolve('node_modules/snarkyjs')
+    };
+    config.experiments = { ...config.experiments, topLevelAwait: true };
+    return config;
+  },
+
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+        ],
+      },
+    ];
+  }
+};
+```
+### Vite React.js 
+add the [vite-plugin-top-level-await](https://github.com/Menci/vite-plugin-top-level-await)
+
+```sh
+# using npm
+npm install vite-plugin-top-level-await
+
+# using yarn
+yarn add vite-plugin-top-level-await
+```
+After installing the Vite plugin open the `vite.config.ts` and add these two entries.
+
+
+```ts
+export default defineConfig({
+  plugins: [
+    topLevelAwait(),
+    {
+      name: "isolation",
+      configureServer(server) {
+        server.middlewares.use((_req, res, next) => {
+          res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+          res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+          next();
+        });
+      },
+    },
+  ],
+});
+```
 
 ## Defining a ZK state
 
@@ -35,7 +101,9 @@ interface ZKState {
 const { useInitZkStore, useZKStore, useGetLatestProof } =
   createZKState<ZKState>(
     // replace './zkStatesWorker.ts` with the path to the previously defined web worker
-    new Worker(new URL("./zkStatesWorker.ts", import.meta.url)),
+    new Worker(new URL("./zkStatesWorker.ts", import.meta.url),{
+        type:"module",
+    }),
 
     // zustand state definition https://github.com/pmndrs/zustand
     (set) => ({
