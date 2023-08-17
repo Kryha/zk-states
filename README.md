@@ -50,15 +50,21 @@ const { useInitZkStore, useZKStore, useGetLatestProof } =
             num: state.num + 1,
           };
         }),
-    })
+    }),
+    
+    // Define the state variable that you want to trigger a proof generation on
+    // NOTE Functions will never trigger a proof generation
+    ["num"]
   );
 ```
 
 ## Configuring your project
-To enable SnarkyJS for the web, we must set the COOP and COEP headers. when using a Vite project we also need to install a plugin to enable topLevelAwait for the webworker.
+
+To enable SnarkyJS for the web, we must set the COOP and COEP headers. When using a Vite project we also need to install a plugin to enable topLevelAwait for the web worker.
 
 ### Next.js
-open the `next.config.js` file and make sure you add these two configs.
+
+open `next.config.js` and make sure you add these two configs.
 
 ```ts
 const nextConfig = {
@@ -91,7 +97,8 @@ const nextConfig = {
 };
 ```
 ### Vite React.js 
-add the [vite-plugin-top-level-await](https://github.com/Menci/vite-plugin-top-level-await)
+
+add [vite-plugin-top-level-await](https://github.com/Menci/vite-plugin-top-level-await)
 
 ```sh
 # using npm
@@ -100,7 +107,7 @@ npm install vite-plugin-top-level-await
 # using yarn
 yarn add vite-plugin-top-level-await
 ```
-After installing the Vite plugin open the `vite.config.ts` and add these two entries.
+After installing the Vite plugin open the `vite.config.ts` and add these two entries:
 
 
 ```ts
