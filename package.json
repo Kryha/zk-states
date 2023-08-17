@@ -1,7 +1,7 @@
 {
   "name": "zk-states",
   "packageManager": "yarn@3.6.1",
-  "version": "0.0.10",
+  "version": "0.0.15",
   "description": "Verifiable state manager for React based on SnarkyJS & Mina protocol",
   "typesVersions": {
     "<4.0": {
