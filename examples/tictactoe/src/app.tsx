@@ -1,11 +1,11 @@
 import { Board, HistoryButtons } from "./components/";
-import { useInitZkStore, useZKStore, useStore } from "./store";
-import "./styles.css";
 import { usePlayerturn } from "./hooks";
+import { useInitZkStore, useZKStore } from "./store";
+import "./styles.css";
 
 export default function TicTacToe() {
   const { jumpTo, playerTurn, status } = usePlayerturn();
-  const history = useStore((state) => state.history);
+  const history = useZKStore((state) => state.history);
   const board = useZKStore((state) => state.board);
 
   useInitZkStore();

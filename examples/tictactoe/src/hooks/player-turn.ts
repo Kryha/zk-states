@@ -1,18 +1,18 @@
+import { useZKStore } from "../store";
+import type { Player } from "../types";
 import { calculateWinner } from "../util";
-import { useStore, useZKStore } from "../store";
-import { Player } from "../types";
 
 export const usePlayerturn = () => {
-  const history = useStore((state) => state.history);
-  const turnNumber = useStore((state) => state.turnNumber);
-  const finished = useStore((state) => state.finished);
-  const xIsNext = useStore((state) => state.xIsNext);
-  const setFinished = useStore((state) => state.setFinished);
-  const setXIsNext = useStore((state) => state.setXIsNext);
-  const newTurn = useStore((state) => state.newTurn);
+  const history = useZKStore((state) => state.history);
+  const turnNumber = useZKStore((state) => state.turnNumber);
+  const finished = useZKStore((state) => state.finished);
+  const xIsNext = useZKStore((state) => state.xIsNext);
+  const setFinished = useZKStore((state) => state.setFinished);
+  const setXIsNext = useZKStore((state) => state.setXIsNext);
+  const newTurn = useZKStore((state) => state.newTurn);
   const updateBoard = useZKStore((state) => state.updateBoard);
   const setBoard = useZKStore((state) => state.setBoard);
-  const setHistory = useStore((state) => state.setHistory);
+  const setHistory = useZKStore((state) => state.setHistory);
 
   const board = useZKStore((state) => state.board);
 
