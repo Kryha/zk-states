@@ -51,20 +51,19 @@ const { useInitZkStore, useZKStore, useGetLatestProof } =
           };
         }),
     }),
-    
-    // Define the state variable that you want to trigger a proof generation on
-    // NOTE Functions will never trigger a proof generation
+    // Define state properties that should trigger proof generation when mutated.
+    // You can define assertions in the Actions so that the proofs are generated based only on VALID STATE TRANSITIONS    
     ["num"]
   );
 ```
 
 ## Configuring your project
 
-To enable SnarkyJS for the web, we must set the COOP and COEP headers. When using a Vite project we also need to install a plugin to enable topLevelAwait for the web worker.
+ZkStates leverages SnarkyJS to enable proof generation in the browser. to enable SnarkyJS for the web, we must set the COOP and COEP headers. When using a Vite project we also need to install a plugin to enable topLevelAwait for the web worker.
 
 ### Next.js
 
-open `next.config.js` and make sure you add these two configs.
+Open `next.config.js` and make sure you add these two configs.
 
 ```ts
 const nextConfig = {
