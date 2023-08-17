@@ -36,7 +36,7 @@ const { useInitZkStore, useZKStore, useGetLatestProof } =
   createZKState<ZKState>(
     // replace './zkStatesWorker.ts` with the path to the previously defined web worker
     new Worker(new URL("./zkStatesWorker.ts", import.meta.url),{
-        type:"module",
+      type:"module",
     }),
 
     // zustand state definition https://github.com/pmndrs/zustand
