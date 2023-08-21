@@ -30,7 +30,8 @@
     "eslint:ci": "eslint  --no-eslintrc --c .eslintrc.json '*.{js,json}' '{src,tests}/**/*.{ts,tsx}'",
     "pretest": "tsc --noEmit",
     "test": "vitest --ui --coverage",
-    "test:ci": "vitest"
+    "test:ci": "vitest",
+    "test:debug": "DEBUG=vitest:web-worker vitest"
   },
   "engines": {
     "node": ">=12.7.0"
@@ -57,6 +58,7 @@
     "@rollup/plugin-commonjs": "^25.0.3",
     "@rollup/plugin-node-resolve": "^15.1.0",
     "@rollup/plugin-typescript": "^11.1.2",
+    "@testing-library/jest-dom": "^6.0.1",
     "@testing-library/react": "^14.0.0",
     "@types/react": "^18.2.15",
     "@types/rollup-plugin-peer-deps-external": "^2.2.1",

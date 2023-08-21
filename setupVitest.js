@@ -1,7 +1,9 @@
-//setupVitest.js or similar file
-import { vi } from "vitest";
+import matchers from "@testing-library/jest-dom/matchers";
+import { expect, vi } from "vitest";
 import createFetchMock from "vitest-fetch-mock";
 import "vitest-canvas-mock";
+
+expect.extend(matchers);
 
 const fetchMocker = createFetchMock(vi);
 
