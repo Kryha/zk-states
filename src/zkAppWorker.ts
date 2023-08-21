@@ -13,6 +13,8 @@ import {
 } from "./types";
 import { INITIAL_STATE, MERKLE_TREE_HEIGHT, MerkleWitness20 } from "./utils";
 
+let post = postMessage;
+
 const state: WorkerState = {
   tree: new MerkleTree(MERKLE_TREE_HEIGHT),
   transitionIndex: 0n, // should increment on state transition and is used to index the tree
@@ -43,7 +45,7 @@ setInterval(() => {
         id: 0,
         data: proof.toJSON(),
       };
-      postMessage(message);
+      post(message);
 
       state.executingUpdate = false;
     })
@@ -136,28 +138,35 @@ export interface ZkappWorkerReponse {
   data: unknown;
 }
 
-export const initZKWorker = () => {
+const onMessage = async (event: MessageEvent<ZkappWorkerRequest>) => {
+  try {
+    const returnData = await workerFunctions[event.data.fn](event.data.args);
+
+    const message: ZkappWorkerReponse = {
+      resType: "function-call",
+      id: event.data.id,
+      data: returnData,
+    };
+    post(message);
+  } catch (error) {
+    console.warn("Worker Error:", error);
+  }
+};
+
+/**
+ * Sets the message listener in the worker. Read the README for informations on how to use in your own code.
+ *
+ * @param testRef reference to the worker file when testing the library, do not use when developing
+ */
+export const initZKWorker = (testRef?: Window & typeof globalThis) => {
   console.info("[zk-states worker] adding event listener");
 
-  addEventListener(
-    "message",
-    async (event: MessageEvent<ZkappWorkerRequest>) => {
-      try {
-        const returnData = await workerFunctions[event.data.fn](
-          event.data.args,
-        );
-
-        const message: ZkappWorkerReponse = {
-          resType: "function-call",
-          id: event.data.id,
-          data: returnData,
-        };
-        postMessage(message);
-      } catch (error) {
-        console.warn("Worker Error:", error);
-      }
-    },
-  );
+  if (testRef) {
+    post = testRef.postMessage;
+    testRef.onmessage = onMessage;
+  } else {
+    onmessage = onMessage;
+  }
 
   console.info("[zk-states worker] added worker service listener.");
 };

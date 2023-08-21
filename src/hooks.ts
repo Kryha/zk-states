@@ -27,7 +27,7 @@ export const createZKState = <T extends object>(
   const useZKStore = create<T>(createState);
   const zkAppWorkerClient = new ZkAppWorkerClient(worker);
 
-  const useInitZkStore = () => {
+  const useInitZKStore = () => {
     const isInitialized = useContractStore((state) => state.isInitialized);
 
     const setProof = useContractStore((state) => state.setProof);
@@ -80,5 +80,15 @@ export const createZKState = <T extends object>(
     };
   };
 
-  return { useInitZkStore, useZKStore, useGetLatestProof };
+  const useProof = () => useContractStore((state) => state.proof);
+  const useIsInitialized = () =>
+    useContractStore((state) => state.isInitialized);
+
+  return {
+    useInitZKStore,
+    useZKStore,
+    useGetLatestProof,
+    useProof,
+    useIsInitialized,
+  };
 };
