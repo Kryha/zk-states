@@ -24,6 +24,7 @@ const {
     num: 0,
     incNum: () => set((state) => ({ num: state.num + 1 })),
   }),
+  ["num"],
 );
 
 describe("createZKState", () => {
