@@ -7,7 +7,7 @@ const parseNumericArgs = (a: Numeric, b: Numeric) => {
   return methodArgs;
 };
 
-export const initZKAssert = (worker: Worker) => {
+export const createZKAssert = (worker: Worker) => {
   const workerClient = new ZkAppWorkerClient(worker);
 
   return {
