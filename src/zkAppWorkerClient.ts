@@ -1,5 +1,5 @@
 import { type JsonProof } from "snarkyjs";
-import type { TransitionRes, TransitionStateArgs } from "./types";
+import type { CallAssertionArgs, TransitionRes } from "./types";
 import {
   type WorkerFunctions,
   type ZkappWorkerReponse,
@@ -58,18 +58,13 @@ export class ZkAppWorkerClient {
     return this.latestProof;
   }
 
-  async getTreeRoot(args: unknown) {
-    const root = await this.call("getTreeRoot", args);
-    return root as string;
-  }
-
   async init(args: unknown) {
     const result = (await this.call("init", args)) as TransitionRes;
     this.latestProof = result.proof;
     return result;
   }
 
-  async transitionState(args: TransitionStateArgs) {
-    await this.call("transitionState", args);
+  async callAssertion(args: CallAssertionArgs) {
+    await this.call("callAssertion", args);
   }
 }
