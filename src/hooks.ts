@@ -1,31 +1,14 @@
 import { useEffect } from "react";
 import { type StateCreator, create } from "zustand";
 import { useContractStore } from "./store";
-import { INITIAL_STATE, wait } from "./utils";
-import { ZkAppWorkerClient } from "./zkAppWorkerClient";
-
-let oldState = INITIAL_STATE;
-
-const stringifyState = <T extends object>(state: T, toProof: (keyof T)[]) => {
-  const stateVariables: Record<string, unknown> = {};
-  Object.entries(state).forEach(([key, value]) => {
-    if (typeof value !== "function" && toProof.includes(key as keyof T)) {
-      stateVariables[key] = value;
-    }
-  });
-
-  const payload = JSON.stringify(stateVariables);
-
-  return payload;
-};
+import { wait } from "./utils";
+import type { ZkAppWorkerClient } from "./zkAppWorkerClient";
 
 export const createZKState = <T extends object>(
-  worker: Worker,
+  zkAppWorkerClient: ZkAppWorkerClient,
   createState: StateCreator<T, [], []>,
-  toProof: (keyof T)[],
 ) => {
   const useZKStore = create<T>(createState);
-  const zkAppWorkerClient = new ZkAppWorkerClient(worker);
 
   const useInitZKStore = () => {
     const isInitialized = useContractStore((state) => state.isInitialized);
@@ -34,8 +17,6 @@ export const createZKState = <T extends object>(
     const setIsInitialized = useContractStore(
       (state) => state.setIsInitialized,
     );
-
-    const state = useZKStore((state) => state);
 
     useEffect(() => {
       const init = async () => {
@@ -52,20 +33,6 @@ export const createZKState = <T extends object>(
       };
       void init();
     }, [isInitialized, setIsInitialized, setProof]);
-
-    useEffect(() => {
-      if (!isInitialized) return;
-
-      const newState = stringifyState<T>(state, toProof);
-
-      if (newState === oldState) return;
-
-      oldState = newState;
-
-      void zkAppWorkerClient.transitionState({
-        newState,
-      });
-    }, [isInitialized, state]);
   };
 
   const useGetLatestProof = () => {
