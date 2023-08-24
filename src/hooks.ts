@@ -1,14 +1,31 @@
 import { useEffect } from "react";
 import { type StateCreator, create } from "zustand";
+import { FailedLocalAssert } from "./assertions";
 import { useContractStore } from "./store";
 import { wait } from "./utils";
 import type { ZkAppWorkerClient } from "./zkAppWorkerClient";
+
+type ZKImpl = <T>(
+  storeInitializer: StateCreator<T, [], []>,
+) => StateCreator<T, [], []>;
+
+const zkImpl: ZKImpl = (initializer) => (set, get, store) => {
+  store.setState = (updater, replace) => {
+    try {
+      set(updater, replace);
+    } catch (error) {
+      if (error instanceof FailedLocalAssert) return;
+    }
+  };
+
+  return initializer(store.setState, get, store);
+};
 
 export const createZKState = <T extends object>(
   zkAppWorkerClient: ZkAppWorkerClient,
   createState: StateCreator<T, [], []>,
 ) => {
-  const useZKStore = create<T>(createState);
+  const useZKStore = create<T>(zkImpl(createState));
 
   const useInitZKStore = () => {
     const isInitialized = useContractStore((state) => state.isInitialized);

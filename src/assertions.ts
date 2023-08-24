@@ -1,4 +1,18 @@
-import { ZkAppWorkerClient } from "./zkAppWorkerClient";
+import type { AssertMethod } from "./types";
+import type { ZkAppWorkerClient } from "./zkAppWorkerClient";
+
+export class FailedLocalAssert extends Error {
+  methodName?: AssertMethod;
+
+  constructor(methodName?: AssertMethod) {
+    super();
+
+    this.methodName = methodName;
+    this.message = `Local assertion failed ${
+      methodName && `at method ${methodName}`
+    }`;
+  }
+}
 
 type Numeric = number | bigint;
 
@@ -7,18 +21,15 @@ const parseNumericArgs = (a: Numeric, b: Numeric) => {
   return methodArgs;
 };
 
-export const createZKAssert = (worker: Worker) => {
-  const workerClient = new ZkAppWorkerClient(worker);
-
+export const createZKAssert = (workerClient: ZkAppWorkerClient) => {
   return {
     numeric: {
       equals: (a: Numeric, b: Numeric) => {
         if (a === b) {
           const methodArgs = parseNumericArgs(a, b);
           workerClient.callAssertion({ methodName: "fieldEquals", methodArgs });
-          return true;
         } else {
-          return false;
+          throw new FailedLocalAssert("fieldEquals");
         }
       },
 
@@ -29,9 +40,8 @@ export const createZKAssert = (worker: Worker) => {
             methodName: "fieldNotEquals",
             methodArgs,
           });
-          return true;
         } else {
-          return false;
+          throw new FailedLocalAssert("fieldNotEquals");
         }
       },
 
@@ -42,9 +52,8 @@ export const createZKAssert = (worker: Worker) => {
             methodName: "fieldGreaterThan",
             methodArgs,
           });
-          return true;
         } else {
-          return false;
+          throw new FailedLocalAssert("fieldGreaterThan");
         }
       },
 
@@ -55,9 +64,8 @@ export const createZKAssert = (worker: Worker) => {
             methodName: "fieldGreaterThanOrEqual",
             methodArgs,
           });
-          return true;
         } else {
-          return false;
+          throw new FailedLocalAssert("fieldGreaterThanOrEqual");
         }
       },
 
@@ -68,9 +76,8 @@ export const createZKAssert = (worker: Worker) => {
             methodName: "fieldLessThan",
             methodArgs,
           });
-          return true;
         } else {
-          return false;
+          throw new FailedLocalAssert("fieldLessThan");
         }
       },
 
@@ -81,9 +88,8 @@ export const createZKAssert = (worker: Worker) => {
             methodName: "fieldLessThanOrEqual",
             methodArgs,
           });
-          return true;
         } else {
-          return false;
+          throw new FailedLocalAssert("fieldGreaterThanOrEqual");
         }
       },
     },
