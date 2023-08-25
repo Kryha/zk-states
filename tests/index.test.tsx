@@ -1,7 +1,6 @@
-import React from "react";
 import "@vitest/web-worker";
-import { fireEvent, render, waitFor } from "@testing-library/react";
-import type { JsonProof } from "snarkyjs";
+import { renderHook, waitFor } from "@testing-library/react";
+import { act } from "react-dom/test-utils";
 import { describe, expect, it } from "vitest";
 import { createZKAssert, createZKState } from "zk-states";
 import { ZkAppWorkerClient } from "zk-states/zkAppWorkerClient";
@@ -42,92 +41,75 @@ describe("createZKState", () => {
     expect(useIsInitialized).toBeDefined();
   });
 
-  it("renders the correct initial global state value in a React component", async () => {
-    const expectedValue = 0;
+  it("returns the correct initial global state value", async () => {
+    const { result } = renderHook(() => useZKStore((state) => state.num));
 
-    const Component = () => {
-      const num = useZKStore((state) => state.num);
-      return <div>num: {num}</div>;
-    };
-
-    const { findByText } = render(<Component />);
-
-    await findByText(`num: ${expectedValue}`);
+    expect(result.current).toBe(0);
   });
 
   it("correctly initializes ZK store with useInitZKStore", async () => {
-    let proof: JsonProof | undefined;
+    const { result: resIsInitialized } = renderHook(() => useIsInitialized());
+    const { result: resProof } = renderHook(() => useProof());
 
-    const Component = () => {
-      const isInitialized = useIsInitialized();
-      proof = useProof();
+    renderHook(() => {
       useInitZKStore();
-      return <div>isInitialized: {isInitialized ? "true" : "false"}</div>;
-    };
-
-    const { getByText } = render(<Component />);
+    });
 
     await waitFor(
       () => {
-        expect(getByText("isInitialized: true")).toBeInTheDocument();
+        expect(resIsInitialized.current).toBe(true);
       },
       { timeout: 300000 },
     );
 
-    expect(proof).toBeDefined();
+    expect(resProof.current).toBeDefined();
   });
 
   it("respects local assertions in actions", async () => {
-    let proof: JsonProof | undefined;
+    const { result: resIsInitialized } = renderHook(() => useIsInitialized());
+    const { result: resProof } = renderHook(() => useProof());
+    const { result: resNum } = renderHook(() =>
+      useZKStore((state) => state.num),
+    );
+    const { result: resIncNum } = renderHook(() =>
+      useZKStore((state) => state.incNum),
+    );
 
-    const Component = () => {
-      const num = useZKStore((state) => state.num);
-      const incNum = useZKStore((state) => state.incNum);
-
-      const isInitialized = useIsInitialized();
-      proof = useProof();
-
+    renderHook(() => {
       useInitZKStore();
-
-      return (
-        <div>
-          <p>isInitialized: {isInitialized ? "true" : "false"}</p>
-          <p>num: {num}</p>
-          <button onClick={() => incNum()}>Increment</button>
-        </div>
-      );
-    };
-
-    const { getByText } = render(<Component />);
+    });
 
     await waitFor(
       () => {
-        expect(getByText("isInitialized: true")).toBeInTheDocument();
+        expect(resIsInitialized.current).toBe(true);
       },
       { timeout: 300000 },
     );
 
-    expect(proof).toBeDefined();
-    expect(getByText("num: 0")).toBeDefined();
+    expect(resProof.current).toBeDefined();
+    expect(resNum.current).toBe(0);
 
-    const incButton = getByText("Increment");
+    const increment = () =>
+      act(() => {
+        resIncNum.current();
+      });
 
-    fireEvent.click(incButton);
-    expect(getByText("num: 1")).toBeDefined();
+    increment();
+    expect(resNum.current).toBe(1);
 
-    fireEvent.click(incButton);
-    expect(getByText("num: 2")).toBeDefined();
+    increment();
+    expect(resNum.current).toBe(2);
 
-    fireEvent.click(incButton);
-    expect(getByText("num: 3")).toBeDefined();
+    increment();
+    expect(resNum.current).toBe(3);
 
-    fireEvent.click(incButton);
-    expect(getByText("num: 4")).toBeDefined();
+    increment();
+    expect(resNum.current).toBe(4);
 
-    fireEvent.click(incButton);
-    expect(getByText("num: 5")).toBeDefined();
+    increment();
+    expect(resNum.current).toBe(5);
 
-    fireEvent.click(incButton);
-    expect(getByText("num: 5")).toBeDefined();
+    increment();
+    expect(resNum.current).toBe(5);
   });
 });
