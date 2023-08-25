@@ -2,8 +2,7 @@ import "@vitest/web-worker";
 import { renderHook, waitFor } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import { beforeAll, describe, expect, it } from "vitest";
-import { createZKAssert, createZKState } from "zk-states";
-import { ZkAppWorkerClient } from "zk-states/zkAppWorkerClient";
+import { ZkAppWorkerClient, createZKAssert, createZKState } from "zk-states";
 
 interface ZKState {
   testLessThan: number;
