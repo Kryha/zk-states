@@ -12,6 +12,7 @@ import {
 let post = (res: ZkappWorkerReponse | WorkerStateUpdate) => postMessage(res);
 
 const state: WorkerState = {
+  // TODO: consider grouping updates if they were called from the same action
   updateQueue: [],
   isProving: false,
 };

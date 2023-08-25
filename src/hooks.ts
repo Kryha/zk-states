@@ -9,6 +9,7 @@ type ZKImpl = <T>(
   storeInitializer: StateCreator<T, [], []>,
 ) => StateCreator<T, [], []>;
 
+// TODO: if one assertion fails locally in the action, the following AND PREVIOUS called in the same action should not execute the program
 const zkImpl: ZKImpl = (initializer) => (set, get, store) => {
   store.setState = (updater, replace) => {
     try {

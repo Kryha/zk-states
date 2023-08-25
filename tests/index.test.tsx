@@ -39,7 +39,6 @@ const { useInitZKStore, useZKStore, useProof, useIsInitialized } =
 
     setTestLessThan: (num) =>
       set(() => {
-        // TODO: if one assertion fails locally in the action, the following AND PREVIOUS should not execute the program
         zkAssert.numeric.lessThan(num, 5);
         return { testLessThan: num };
       }),
