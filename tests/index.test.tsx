@@ -1,7 +1,7 @@
 import "@vitest/web-worker";
 import { renderHook, waitFor } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { createZKAssert, createZKState } from "zk-states";
 import { ZkAppWorkerClient } from "zk-states/zkAppWorkerClient";
 
@@ -66,16 +66,12 @@ describe("createZKState", () => {
 
     expect(resProof.current).toBeDefined();
   });
+});
 
-  it("respects numeric.lessThan local assertion", async () => {
-    const { result: resIsInitialized } = renderHook(() => useIsInitialized());
+describe("createZKAssert", () => {
+  beforeAll(async () => {
     const { result: resProof } = renderHook(() => useProof());
-    const { result: resNum } = renderHook(() =>
-      useZKStore((state) => state.testLessThan),
-    );
-    const { result: resSetNum } = renderHook(() =>
-      useZKStore((state) => state.setTestLessThan),
-    );
+    const { result: resIsInitialized } = renderHook(() => useIsInitialized());
 
     renderHook(() => {
       useInitZKStore();
@@ -87,8 +83,17 @@ describe("createZKState", () => {
       },
       { timeout: 300000 },
     );
-
     expect(resProof.current).toBeDefined();
+  });
+
+  it("respects numeric.lessThan local assertion", async () => {
+    const { result: resNum } = renderHook(() =>
+      useZKStore((state) => state.testLessThan),
+    );
+    const { result: resSetNum } = renderHook(() =>
+      useZKStore((state) => state.setTestLessThan),
+    );
+
     expect(resNum.current).toBe(0);
 
     act(() => {
