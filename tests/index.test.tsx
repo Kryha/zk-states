@@ -6,8 +6,8 @@ import { createZKAssert, createZKState } from "zk-states";
 import { ZkAppWorkerClient } from "zk-states/zkAppWorkerClient";
 
 interface ZKState {
-  num: number;
-  incNum: () => void;
+  testLessThan: number;
+  setTestLessThan: (num: number) => void;
 }
 
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {
@@ -24,12 +24,12 @@ const {
   useProof,
   useIsInitialized,
 } = createZKState<ZKState>(workerClient, (set) => ({
-  num: 0,
-  incNum: () =>
-    set((state) => {
+  testLessThan: 0,
+  setTestLessThan: (num) =>
+    set(() => {
       // TODO: if one assertion fails locally in the action, the following AND PREVIOUS should not execute the program
-      zkAssert.numeric.lessThan(state.num, 5);
-      return { num: state.num + 1 };
+      zkAssert.numeric.lessThan(num, 5);
+      return { testLessThan: num };
     }),
 }));
 
@@ -41,8 +41,10 @@ describe("createZKState", () => {
     expect(useIsInitialized).toBeDefined();
   });
 
-  it("returns the correct initial global state value", async () => {
-    const { result } = renderHook(() => useZKStore((state) => state.num));
+  it("returns the correct initial global state values", async () => {
+    const { result } = renderHook(() =>
+      useZKStore((state) => state.testLessThan),
+    );
 
     expect(result.current).toBe(0);
   });
@@ -65,14 +67,14 @@ describe("createZKState", () => {
     expect(resProof.current).toBeDefined();
   });
 
-  it("respects local assertions in actions", async () => {
+  it("respects numeric.lessThan local assertion", async () => {
     const { result: resIsInitialized } = renderHook(() => useIsInitialized());
     const { result: resProof } = renderHook(() => useProof());
     const { result: resNum } = renderHook(() =>
-      useZKStore((state) => state.num),
+      useZKStore((state) => state.testLessThan),
     );
-    const { result: resIncNum } = renderHook(() =>
-      useZKStore((state) => state.incNum),
+    const { result: resSetNum } = renderHook(() =>
+      useZKStore((state) => state.setTestLessThan),
     );
 
     renderHook(() => {
@@ -89,27 +91,24 @@ describe("createZKState", () => {
     expect(resProof.current).toBeDefined();
     expect(resNum.current).toBe(0);
 
-    const increment = () =>
-      act(() => {
-        resIncNum.current();
-      });
-
-    increment();
-    expect(resNum.current).toBe(1);
-
-    increment();
-    expect(resNum.current).toBe(2);
-
-    increment();
-    expect(resNum.current).toBe(3);
-
-    increment();
+    act(() => {
+      resSetNum.current(4);
+    });
     expect(resNum.current).toBe(4);
 
-    increment();
-    expect(resNum.current).toBe(5);
-
-    increment();
-    expect(resNum.current).toBe(5);
+    act(() => {
+      resSetNum.current(5);
+    });
+    expect(resNum.current).toBe(4);
   });
+
+  // it("respects numeric.lessThanOrEqual assertion", async () => {});
+
+  // it("respects numeric.greaterThan assertion", async () => {});
+
+  // it("respects numeric.greaterThanOrEqual assertion", async () => {});
+
+  // it("respects numeric.equals assertion", async () => {});
+
+  // it("respects numeric.notEquals assertion", async () => {});
 });
