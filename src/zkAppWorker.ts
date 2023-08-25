@@ -5,10 +5,11 @@ import {
   type AssertProof,
   type TransitionRes,
   type WorkerState,
+  type WorkerStateUpdate,
   callAssertionArgsSchema,
 } from "./types";
 
-let post = postMessage;
+let post = (res: ZkappWorkerReponse | WorkerStateUpdate) => postMessage(res);
 
 const state: WorkerState = {
   updateQueue: [],
@@ -24,19 +25,29 @@ setInterval(() => {
   if (!nextUpdate) return;
 
   state.isProving = true;
+  post({
+    updateType: "isProving",
+    data: state.isProving,
+  });
 
   nextUpdate(state.latestProof)
     .then((proof) => {
       state.latestProof = proof;
 
-      const message: ZkappWorkerReponse = {
-        resType: "proof-update",
-        id: 0,
-        data: proof.toJSON(),
-      };
-      post(message);
-
       state.isProving = false;
+
+      post({
+        updateType: "latestProof",
+        data: state.latestProof.toJSON(),
+      });
+      post({
+        updateType: "isProving",
+        data: state.isProving,
+      });
+      post({
+        updateType: "updateQueue",
+        data: state.updateQueue.length,
+      });
     })
     .catch((err) => {
       console.warn("Update queue error:", err);
@@ -75,6 +86,10 @@ const workerFunctions = {
 
     const prove = generateAssertion(methodName, methodArgs);
     state.updateQueue.unshift(prove);
+    post({
+      updateType: "updateQueue",
+      data: state.updateQueue.length,
+    });
   },
 };
 
@@ -87,7 +102,6 @@ export interface ZkappWorkerRequest {
 }
 
 export interface ZkappWorkerReponse {
-  resType: "function-call" | "proof-update";
   id: number;
   data: unknown;
 }
@@ -97,7 +111,6 @@ const onMessage = async (event: MessageEvent<ZkappWorkerRequest>) => {
     const returnData = await workerFunctions[event.data.fn](event.data.args);
 
     const message: ZkappWorkerReponse = {
-      resType: "function-call",
       id: event.data.id,
       data: returnData,
     };
@@ -116,7 +129,9 @@ export const initZKWorker = (testRef?: Window & typeof globalThis) => {
   console.info("[zk-states worker] adding event listener");
 
   if (testRef) {
-    post = testRef.postMessage;
+    post = (res: ZkappWorkerReponse | WorkerStateUpdate) =>
+      testRef.postMessage(res);
+
     testRef.onmessage = onMessage;
   } else {
     onmessage = onMessage;

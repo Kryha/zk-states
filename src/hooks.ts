@@ -34,6 +34,8 @@ export const createZKState = <T extends object>(
     const setIsInitialized = useContractStore(
       (state) => state.setIsInitialized,
     );
+    const setProofsLeft = useContractStore((state) => state.setProofsLeft);
+    const setIsProving = useContractStore((state) => state.setIsProving);
 
     useEffect(() => {
       const init = async () => {
@@ -43,25 +45,34 @@ export const createZKState = <T extends object>(
         // waiting so that the worker starts before this gets executed
         await wait(4000);
 
-        const { proof } = await zkAppWorkerClient.init({});
+        const { proof } = await zkAppWorkerClient.init({}, (workerRes) => {
+          switch (workerRes.updateType) {
+            case "latestProof": {
+              setProof(workerRes.data);
+              break;
+            }
+            case "updateQueue": {
+              setProofsLeft(workerRes.data);
+              break;
+            }
+            case "isProving": {
+              setIsProving(workerRes.data);
+              break;
+            }
+          }
+        });
 
         setIsInitialized(true);
         setProof(proof);
       };
       void init();
-    }, [isInitialized, setIsInitialized, setProof]);
-  };
-
-  const useGetLatestProof = () => {
-    const setProof = useContractStore((state) => state.setProof);
-
-    return () => {
-      const latestProof = zkAppWorkerClient.getLatestProof();
-      if (latestProof) {
-        setProof(latestProof);
-      }
-      return latestProof;
-    };
+    }, [
+      isInitialized,
+      setIsInitialized,
+      setIsProving,
+      setProof,
+      setProofsLeft,
+    ]);
   };
 
   const useProof = () => useContractStore((state) => state.proof);
@@ -71,7 +82,6 @@ export const createZKState = <T extends object>(
   return {
     useInitZKStore,
     useZKStore,
-    useGetLatestProof,
     useProof,
     useIsInitialized,
   };

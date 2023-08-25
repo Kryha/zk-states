@@ -1,5 +1,8 @@
-import { type JsonProof } from "snarkyjs";
-import type { CallAssertionArgs, TransitionRes } from "./types";
+import type {
+  CallAssertionArgs,
+  TransitionRes,
+  WorkerStateUpdate,
+} from "./types";
 import {
   type WorkerFunctions,
   type ZkappWorkerReponse,
@@ -18,24 +21,10 @@ export class ZkAppWorkerClient {
 
   nextId: number;
 
-  latestProof: JsonProof | undefined;
-
   constructor(worker: Worker) {
     this.worker = worker;
     this.promises = {};
     this.nextId = 0;
-
-    this.worker.onmessage = (event: MessageEvent<ZkappWorkerReponse>) => {
-      switch (event.data.resType) {
-        case "function-call":
-          this.promises[event.data.id].resolve(event.data.data);
-          delete this.promises[event.data.id];
-          break;
-        case "proof-update":
-          this.latestProof = event.data.data as JsonProof | undefined;
-          break;
-      }
-    };
   }
 
   private call(fn: WorkerFunctions, args: unknown) {
@@ -54,13 +43,22 @@ export class ZkAppWorkerClient {
     });
   }
 
-  getLatestProof() {
-    return this.latestProof;
-  }
+  async init(
+    args: unknown,
+    onWorkerStateUpdate?: (workerRes: WorkerStateUpdate) => void,
+  ) {
+    this.worker.onmessage = (
+      event: MessageEvent<ZkappWorkerReponse | WorkerStateUpdate>,
+    ) => {
+      if ("updateType" in event.data) {
+        onWorkerStateUpdate && onWorkerStateUpdate(event.data);
+      } else {
+        this.promises[event.data.id].resolve(event.data.data);
+        delete this.promises[event.data.id];
+      }
+    };
 
-  async init(args: unknown) {
     const result = (await this.call("init", args)) as TransitionRes;
-    this.latestProof = result.proof;
     return result;
   }
 

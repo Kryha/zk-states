@@ -32,3 +32,23 @@ export type CallAssertionArgs = z.infer<typeof callAssertionArgsSchema>;
 export interface TransitionRes {
   proof: JsonProof;
 }
+
+interface LatestProofUpdate {
+  updateType: "latestProof";
+  data: JsonProof;
+}
+
+interface UpdateQueueUpdate {
+  updateType: "updateQueue";
+  data: number;
+}
+
+interface IsProvingUpdate {
+  updateType: "isProving";
+  data: boolean;
+}
+
+export type WorkerStateUpdate =
+  | LatestProofUpdate
+  | UpdateQueueUpdate
+  | IsProvingUpdate;
