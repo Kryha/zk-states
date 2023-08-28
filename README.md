@@ -24,36 +24,42 @@ initZKWorker();
 
 That's it for the worker file!
 
-To define a ZK state, you simply need to call `createZKState`. Here is an example:
+You define a ZK State in the following way:
 
 ```ts
+import { ZkAppWorkerClient, createZKAssert, createZKState } from "zk-states";
+
+// replace './zkStatesWorker.ts` with the path to the previously defined web worker
+const worker = new Worker(new URL("./zkStatesWorker.ts", import.meta.url), {
+  type: "module",
+});
+const workerClient = new ZkAppWorkerClient(worker);
+
+// creating the assertion library, it needs the `workerClient` in order to perform calls to the ZK program
+const zkAssert = createZKAssert(workerClient);
+
 interface ZKState {
   num: number;
   incNum: () => void;
 }
 
-const { useInitZkStore, useZKStore, useGetLatestProof } =
-  createZKState<ZKState>(
-    // replace './zkStatesWorker.ts` with the path to the previously defined web worker
-    new Worker(new URL("./zkStatesWorker.ts", import.meta.url),{
-      type:"module",
-    }),
-
-    // zustand state definition https://github.com/pmndrs/zustand
-    (set) => ({
+const { useInitZKStore, useZKStore, useProof, useIsInitialized } =
+  createZKState<ZKState>(workerClient, (set) => ({ // zustand state definition https://github.com/pmndrs/zustand
       num: 0,
       incNum: () =>
         set((state) => {
-          if (state.num >= 5) return {};
+          // This assertion checks the requirements of the specified value.
+          // If these requirements are met, the local state will be updated optimistically
+          // and the proof generation will be queued in the web worker.
+          // In a future implementation, the failure of the proof generation will roll back
+          // to the previous valid state.
+          zkAssert.numeric.lessThanOrEqual(state.num, 5);
 
           return {
             num: state.num + 1,
           };
         }),
     }),
-    // Define state properties that should trigger proof generation when mutated.
-    // You can define assertions in the Actions so that the proofs are generated based only on VALID STATE TRANSITIONS    
-    ["num"]
   );
 ```
 
@@ -95,7 +101,8 @@ const nextConfig = {
   }
 };
 ```
-### Vite React.js 
+
+### Vite React.js
 
 add [vite-plugin-top-level-await](https://github.com/Menci/vite-plugin-top-level-await)
 
@@ -106,8 +113,8 @@ npm install vite-plugin-top-level-await
 # using yarn
 yarn add vite-plugin-top-level-await
 ```
-After installing the Vite plugin open the `vite.config.ts` and add these two entries:
 
+After installing the Vite plugin open the `vite.config.ts` and add these two entries:
 
 ```ts
 export default defineConfig({
@@ -126,6 +133,5 @@ export default defineConfig({
   ],
 });
 ```
-
 
 <!-- TODO: properly document functions -->

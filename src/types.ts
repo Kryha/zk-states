@@ -1,23 +1,54 @@
-import type { Field, JsonProof, MerkleTree, Proof } from "snarkyjs";
+import type { JsonProof, Proof } from "snarkyjs";
 import { z } from "zod";
 
+export type AssertProof = Proof<void, void>;
+
+export const assertMethodSchema = z.enum([
+  "fieldEquals",
+  "fieldNotEquals",
+  "fieldGreaterThan",
+  "fieldGreaterThanOrEqual",
+  "fieldLessThan",
+  "fieldLessThanOrEqual",
+]);
+export type AssertMethod = z.infer<typeof assertMethodSchema>;
+
 export type TransitionFunction = (
-  prevProof: Proof<Field, void>,
-) => Promise<Proof<Field, void>>;
+  prevProof: AssertProof,
+) => Promise<AssertProof>;
 
 export interface WorkerState {
-  tree: MerkleTree;
-  transitionIndex: bigint;
-  latestProof?: Proof<Field, void>;
+  latestProof?: AssertProof;
   updateQueue: TransitionFunction[];
-  executingUpdate: boolean;
+  isProving: boolean;
 }
 
-export const transitionStateArgsSchema = z.object({
-  newState: z.string(),
+export const callAssertionArgsSchema = z.object({
+  methodName: assertMethodSchema,
+  methodArgs: z.array(z.string()),
 });
-export type TransitionStateArgs = z.infer<typeof transitionStateArgsSchema>;
+export type CallAssertionArgs = z.infer<typeof callAssertionArgsSchema>;
 
 export interface TransitionRes {
   proof: JsonProof;
 }
+
+interface LatestProofUpdate {
+  updateType: "latestProof";
+  data: JsonProof;
+}
+
+interface UpdateQueueUpdate {
+  updateType: "updateQueue";
+  data: number;
+}
+
+interface IsProvingUpdate {
+  updateType: "isProving";
+  data: boolean;
+}
+
+export type WorkerStateUpdate =
+  | LatestProofUpdate
+  | UpdateQueueUpdate
+  | IsProvingUpdate;

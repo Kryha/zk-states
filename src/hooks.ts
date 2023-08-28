@@ -1,31 +1,32 @@
 import { useEffect } from "react";
 import { type StateCreator, create } from "zustand";
+import { FailedLocalAssert } from "./assertions";
 import { useContractStore } from "./store";
-import { INITIAL_STATE, wait } from "./utils";
-import { ZkAppWorkerClient } from "./zkAppWorkerClient";
+import { wait } from "./utils";
+import type { ZkAppWorkerClient } from "./zkAppWorkerClient";
 
-let oldState = INITIAL_STATE;
+type ZKImpl = <T>(
+  storeInitializer: StateCreator<T, [], []>,
+) => StateCreator<T, [], []>;
 
-const stringifyState = <T extends object>(state: T, toProof: (keyof T)[]) => {
-  const stateVariables: Record<string, unknown> = {};
-  Object.entries(state).forEach(([key, value]) => {
-    if (typeof value !== "function" && toProof.includes(key as keyof T)) {
-      stateVariables[key] = value;
+// TODO: if one assertion fails locally in the action, the following AND PREVIOUS called in the same action should not execute the program
+const zkImpl: ZKImpl = (initializer) => (set, get, store) => {
+  store.setState = (updater, replace) => {
+    try {
+      set(updater, replace);
+    } catch (error) {
+      if (error instanceof FailedLocalAssert) return;
     }
-  });
+  };
 
-  const payload = JSON.stringify(stateVariables);
-
-  return payload;
+  return initializer(store.setState, get, store);
 };
 
 export const createZKState = <T extends object>(
-  worker: Worker,
+  zkAppWorkerClient: ZkAppWorkerClient,
   createState: StateCreator<T, [], []>,
-  toProof: (keyof T)[],
 ) => {
-  const useZKStore = create<T>(createState);
-  const zkAppWorkerClient = new ZkAppWorkerClient(worker);
+  const useZKStore = create<T>(zkImpl(createState));
 
   const useInitZKStore = () => {
     const isInitialized = useContractStore((state) => state.isInitialized);
@@ -34,8 +35,8 @@ export const createZKState = <T extends object>(
     const setIsInitialized = useContractStore(
       (state) => state.setIsInitialized,
     );
-
-    const state = useZKStore((state) => state);
+    const setProofsLeft = useContractStore((state) => state.setProofsLeft);
+    const setIsProving = useContractStore((state) => state.setIsProving);
 
     useEffect(() => {
       const init = async () => {
@@ -45,39 +46,34 @@ export const createZKState = <T extends object>(
         // waiting so that the worker starts before this gets executed
         await wait(4000);
 
-        const { proof } = await zkAppWorkerClient.init({});
+        const { proof } = await zkAppWorkerClient.init({}, (workerRes) => {
+          switch (workerRes.updateType) {
+            case "latestProof": {
+              setProof(workerRes.data);
+              break;
+            }
+            case "updateQueue": {
+              setProofsLeft(workerRes.data);
+              break;
+            }
+            case "isProving": {
+              setIsProving(workerRes.data);
+              break;
+            }
+          }
+        });
 
         setIsInitialized(true);
         setProof(proof);
       };
       void init();
-    }, [isInitialized, setIsInitialized, setProof]);
-
-    useEffect(() => {
-      if (!isInitialized) return;
-
-      const newState = stringifyState<T>(state, toProof);
-
-      if (newState === oldState) return;
-
-      oldState = newState;
-
-      void zkAppWorkerClient.transitionState({
-        newState,
-      });
-    }, [isInitialized, state]);
-  };
-
-  const useGetLatestProof = () => {
-    const setProof = useContractStore((state) => state.setProof);
-
-    return () => {
-      const latestProof = zkAppWorkerClient.getLatestProof();
-      if (latestProof) {
-        setProof(latestProof);
-      }
-      return latestProof;
-    };
+    }, [
+      isInitialized,
+      setIsInitialized,
+      setIsProving,
+      setProof,
+      setProofsLeft,
+    ]);
   };
 
   const useProof = () => useContractStore((state) => state.proof);
@@ -87,7 +83,6 @@ export const createZKState = <T extends object>(
   return {
     useInitZKStore,
     useZKStore,
-    useGetLatestProof,
     useProof,
     useIsInitialized,
   };

@@ -1,126 +1,96 @@
+import { Assert } from "./program";
+import { prove } from "./prove";
 import {
-  CircuitString,
-  type Field,
-  MerkleTree,
-  Poseidon,
-  type Proof,
-} from "snarkyjs";
-import { StateTracker } from "./program";
-import {
+  type AssertMethod,
+  type AssertProof,
   type TransitionRes,
   type WorkerState,
-  transitionStateArgsSchema,
+  type WorkerStateUpdate,
+  callAssertionArgsSchema,
 } from "./types";
-import { INITIAL_STATE, MERKLE_TREE_HEIGHT, MerkleWitness20 } from "./utils";
 
-let post = postMessage;
+let post = (res: ZkappWorkerReponse | WorkerStateUpdate) => postMessage(res);
 
 const state: WorkerState = {
-  tree: new MerkleTree(MERKLE_TREE_HEIGHT),
-  transitionIndex: 0n, // should increment on state transition and is used to index the tree
+  // TODO: consider grouping updates if they were called from the same action
   updateQueue: [],
-  executingUpdate: false,
+  isProving: false,
 };
 
 setInterval(() => {
-  if (
-    !state.latestProof ||
-    state.executingUpdate ||
-    !state.updateQueue.length
-  ) {
+  if (!state.latestProof || state.isProving || !state.updateQueue.length) {
     return;
   }
 
   const nextUpdate = state.updateQueue.shift();
   if (!nextUpdate) return;
 
-  state.executingUpdate = true;
+  state.isProving = true;
+  post({
+    updateType: "isProving",
+    data: state.isProving,
+  });
 
   nextUpdate(state.latestProof)
     .then((proof) => {
       state.latestProof = proof;
 
-      const message: ZkappWorkerReponse = {
-        resType: "proof-update",
-        id: 0,
-        data: proof.toJSON(),
-      };
-      post(message);
+      state.isProving = false;
 
-      state.executingUpdate = false;
+      post({
+        updateType: "latestProof",
+        data: state.latestProof.toJSON(),
+      });
+      post({
+        updateType: "isProving",
+        data: state.isProving,
+      });
+      post({
+        updateType: "updateQueue",
+        data: state.updateQueue.length,
+      });
     })
     .catch((err) => {
       console.warn("Update queue error:", err);
-      state.executingUpdate = false;
+      state.isProving = false;
     });
 }, 3000);
 
-const generateStateUpdate =
-  (newState: string, leafIndex: bigint) =>
-  async (prevProof: Proof<Field, void>) => {
-    const newStateCircuit = CircuitString.fromString(newState);
-
-    state.tree.setLeaf(leafIndex, Poseidon.hash(newStateCircuit.toFields()));
-
-    const witness = new MerkleWitness20(state.tree.getWitness(leafIndex));
-
+const generateAssertion =
+  (methodName: AssertMethod, methodArgs: string[]) =>
+  async (prevProof: AssertProof) => {
     console.info("[zk-states worker] creating update proof...");
-    const proof = await StateTracker.update(
-      state.tree.getRoot(),
-      prevProof,
-      newStateCircuit,
-      witness,
-    );
+    const proof = await prove(prevProof, methodName, methodArgs);
     console.info("[zk-states worker] update proof generated:", proof.toJSON());
 
     return proof;
   };
 
 const workerFunctions = {
-  getTreeRoot: (_args: unknown) => {
-    return state.tree.getRoot().toString();
-  },
-
   init: async (_args: unknown): Promise<TransitionRes> => {
     console.info("[zk-states worker] compiling program...");
-    // TODO: check if we can cache the compiled program
-    await StateTracker.compile();
+    await Assert.compile();
     console.info("[zk-states worker] program compiled");
 
-    const initialStateCircuit = CircuitString.fromString(INITIAL_STATE);
-
-    state.transitionIndex++;
-
-    state.tree.setLeaf(
-      state.transitionIndex,
-      Poseidon.hash(initialStateCircuit.toFields()),
-    );
-
-    const witness = new MerkleWitness20(
-      state.tree.getWitness(state.transitionIndex),
-    );
-
     console.info("[zk-states worker] creating init proof...");
-    const creationProof = await StateTracker.create(
-      state.tree.getRoot(),
-      initialStateCircuit,
-      witness,
-    );
+    const creationProof = await Assert.init();
     state.latestProof = creationProof;
-
     console.info("[zk-states worker] init done");
 
     return { proof: creationProof.toJSON() };
   },
 
-  transitionState: (args: unknown) => {
+  callAssertion: (args: unknown) => {
     if (!state.latestProof) return;
 
-    const { newState } = transitionStateArgsSchema.parse(args);
+    const { methodName, methodArgs } = callAssertionArgsSchema.parse(args);
 
-    state.transitionIndex++;
-    const prove = generateStateUpdate(newState, state.transitionIndex);
+    const prove = generateAssertion(methodName, methodArgs);
     state.updateQueue.unshift(prove);
+    post({
+      updateType: "updateQueue",
+      data: state.updateQueue.length,
+    });
   },
 };
 
@@ -133,7 +103,6 @@ export interface ZkappWorkerRequest {
 }
 
 export interface ZkappWorkerReponse {
-  resType: "function-call" | "proof-update";
   id: number;
   data: unknown;
 }
@@ -143,7 +112,6 @@ const onMessage = async (event: MessageEvent<ZkappWorkerRequest>) => {
     const returnData = await workerFunctions[event.data.fn](event.data.args);
 
     const message: ZkappWorkerReponse = {
-      resType: "function-call",
       id: event.data.id,
       data: returnData,
     };
@@ -162,7 +130,9 @@ export const initZKWorker = (testRef?: Window & typeof globalThis) => {
   console.info("[zk-states worker] adding event listener");
 
   if (testRef) {
-    post = testRef.postMessage;
+    post = (res: ZkappWorkerReponse | WorkerStateUpdate) =>
+      testRef.postMessage(res);
+
     testRef.onmessage = onMessage;
   } else {
     onmessage = onMessage;
