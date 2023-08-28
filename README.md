@@ -35,6 +35,7 @@ const worker = new Worker(new URL("./zkStatesWorker.ts", import.meta.url), {
 });
 const workerClient = new ZkAppWorkerClient(worker);
 
+// creating the assertion library, it needs the `workerClient` in order to perform calls to the ZK program
 const zkAssert = createZKAssert(workerClient);
 
 interface ZKState {
