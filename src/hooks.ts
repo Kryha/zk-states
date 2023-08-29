@@ -1,42 +1,60 @@
 import { useEffect } from "react";
+import { v4 as uuid } from "uuid";
 import { type StateCreator, create } from "zustand";
 import { FailedLocalAssert } from "./assertions";
-import { useContractStore } from "./store";
+import { globals } from "./globals";
+import {
+  type LibState,
+  type LibStateVars,
+  cloneState,
+  useLibStore,
+} from "./store";
 import { wait } from "./utils";
-import type { ZkAppWorkerClient } from "./zkAppWorkerClient";
+import { ZkAppWorkerClient } from "./zkAppWorkerClient";
 
 type ZKImpl = <T>(
   storeInitializer: StateCreator<T, [], []>,
+  workerClient: ZkAppWorkerClient,
 ) => StateCreator<T, [], []>;
 
-// TODO: if one assertion fails locally in the action, the following AND PREVIOUS called in the same action should not execute the program
-const zkImpl: ZKImpl = (initializer) => (set, get, store) => {
+const zkImpl: ZKImpl = (initializer, workerClient) => (set, get, store) => {
   store.setState = (updater, replace) => {
     try {
       set(updater, replace);
+
+      const callId = uuid();
+
+      globals.stateHistory[callId] = cloneState(get() as LibState);
+
+      workerClient.callAssertions({
+        callId,
+        methods: globals.latestAssertions,
+      });
     } catch (error) {
       if (error instanceof FailedLocalAssert) return;
     }
+    globals.latestAssertions = [];
   };
 
   return initializer(store.setState, get, store);
 };
 
 export const createZKState = <T extends object>(
-  zkAppWorkerClient: ZkAppWorkerClient,
+  worker: Worker,
   createState: StateCreator<T, [], []>,
 ) => {
-  const useZKStore = create<T>(zkImpl(createState));
+  const zkAppWorkerClient = new ZkAppWorkerClient(worker);
+
+  const useZKStore = create<T>(zkImpl(createState, zkAppWorkerClient));
 
   const useInitZKStore = () => {
-    const isInitialized = useContractStore((state) => state.isInitialized);
+    const isInitialized = useLibStore((state) => state.isInitialized);
 
-    const setProof = useContractStore((state) => state.setProof);
-    const setIsInitialized = useContractStore(
-      (state) => state.setIsInitialized,
-    );
-    const setProofsLeft = useContractStore((state) => state.setProofsLeft);
-    const setIsProving = useContractStore((state) => state.setIsProving);
+    const setProof = useLibStore((state) => state.setProof);
+    const setIsInitialized = useLibStore((state) => state.setIsInitialized);
+    const setActionsToProve = useLibStore((state) => state.setActionsToProve);
+    const setIsProving = useLibStore((state) => state.setIsProving);
+    const rollback = useLibStore((state) => state.rollback);
 
     useEffect(() => {
       const init = async () => {
@@ -53,11 +71,21 @@ export const createZKState = <T extends object>(
               break;
             }
             case "updateQueue": {
-              setProofsLeft(workerRes.data);
+              setActionsToProve(workerRes.data);
               break;
             }
             case "isProving": {
               setIsProving(workerRes.data);
+              break;
+            }
+            case "proofError": {
+              const oldState = globals.stateHistory[workerRes.callId];
+              globals.stateHistory = {};
+              rollback(oldState as LibStateVars);
+              break;
+            }
+            case "proofSuccess": {
+              delete globals.stateHistory[workerRes.callId];
               break;
             }
           }
@@ -69,16 +97,16 @@ export const createZKState = <T extends object>(
       void init();
     }, [
       isInitialized,
+      rollback,
       setIsInitialized,
       setIsProving,
       setProof,
-      setProofsLeft,
+      setActionsToProve,
     ]);
   };
 
-  const useProof = () => useContractStore((state) => state.proof);
-  const useIsInitialized = () =>
-    useContractStore((state) => state.isInitialized);
+  const useProof = () => useLibStore((state) => state.proof);
+  const useIsInitialized = () => useLibStore((state) => state.isInitialized);
 
   return {
     useInitZKStore,

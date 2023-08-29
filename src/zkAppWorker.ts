@@ -12,18 +12,18 @@ import {
 let post = (res: ZkappWorkerReponse | WorkerStateUpdate) => postMessage(res);
 
 const state: WorkerState = {
-  // TODO: consider grouping updates if they were called from the same action
   updateQueue: [],
   isProving: false,
 };
 
-setInterval(() => {
+setInterval(async () => {
   if (!state.latestProof || state.isProving || !state.updateQueue.length) {
     return;
   }
 
   const nextUpdate = state.updateQueue.shift();
   if (!nextUpdate) return;
+  const { callId, proveFunctions } = nextUpdate;
 
   state.isProving = true;
   post({
@@ -31,29 +31,47 @@ setInterval(() => {
     data: state.isProving,
   });
 
-  nextUpdate(state.latestProof)
-    .then((proof) => {
-      state.latestProof = proof;
-
-      state.isProving = false;
+  let localProof = state.latestProof;
+  for (const prove of proveFunctions) {
+    try {
+      localProof = await prove(localProof);
 
       post({
         updateType: "latestProof",
-        data: state.latestProof.toJSON(),
+        data: localProof.toJSON(),
       });
-      post({
-        updateType: "isProving",
-        data: state.isProving,
-      });
-      post({
-        updateType: "updateQueue",
-        data: state.updateQueue.length,
-      });
-    })
-    .catch((err) => {
-      console.warn("Update queue error:", err);
+    } catch (error) {
+      console.warn("Update queue error:", error);
+
+      localProof = state.latestProof;
+      state.updateQueue = [];
       state.isProving = false;
-    });
+
+      post({ updateType: "proofError", callId });
+      post({
+        updateType: "latestProof",
+        data: localProof.toJSON(),
+      });
+
+      break;
+    }
+  }
+
+  state.latestProof = localProof;
+  state.isProving = false;
+
+  post({
+    updateType: "proofSuccess",
+    callId,
+  });
+  post({
+    updateType: "isProving",
+    data: state.isProving,
+  });
+  post({
+    updateType: "updateQueue",
+    data: state.updateQueue.length,
+  });
 }, 3000);
 
 const generateAssertion =
@@ -80,13 +98,17 @@ const workerFunctions = {
     return { proof: creationProof.toJSON() };
   },
 
-  callAssertion: (args: unknown) => {
+  callAssertions: (args: unknown) => {
     if (!state.latestProof) return;
 
-    const { methodName, methodArgs } = callAssertionArgsSchema.parse(args);
+    const { methods, callId } = callAssertionArgsSchema.parse(args);
 
-    const prove = generateAssertion(methodName, methodArgs);
-    state.updateQueue.unshift(prove);
+    const proveFunctions = methods.map(({ name, args }) =>
+      generateAssertion(name, args),
+    );
+
+    state.updateQueue.unshift({ callId, proveFunctions });
+
     post({
       updateType: "updateQueue",
       data: state.updateQueue.length,

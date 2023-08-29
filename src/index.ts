@@ -1,4 +1,3 @@
 export { createZKState } from "./hooks";
-export { createZKAssert } from "./assertions";
+export { zkAssert } from "./assertions";
 export { initZKWorker } from "./zkAppWorker";
-export { ZkAppWorkerClient } from "./zkAppWorkerClient";

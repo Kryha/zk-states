@@ -62,7 +62,7 @@ export class ZkAppWorkerClient {
     return result;
   }
 
-  async callAssertion(args: CallAssertionArgs) {
-    await this.call("callAssertion", args);
+  async callAssertions(args: CallAssertionArgs) {
+    await this.call("callAssertions", args);
   }
 }

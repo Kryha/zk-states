@@ -1,25 +1,41 @@
 import type { JsonProof } from "snarkyjs";
 import { create } from "zustand";
 
-export interface ContractState {
+export interface LibStateVars {
   proof?: JsonProof;
   isInitialized: boolean;
   isProving: boolean;
-  proofsLeft: number;
+  actionsToProve: number;
+}
 
+export interface LibStateActions {
   setProof: (proof: JsonProof) => void;
   setIsInitialized: (isInitialized: boolean) => void;
   setIsProving: (isProving: boolean) => void;
-  setProofsLeft: (proofsLeft: number) => void;
+  setActionsToProve: (actionsToProve: number) => void;
+  rollback: (oldState: LibStateVars) => void;
 }
 
-export const useContractStore = create<ContractState>((set) => ({
+export type LibState = LibStateVars & LibStateActions;
+
+export const useLibStore = create<LibState>((set) => ({
   isInitialized: false,
   isProving: false,
-  proofsLeft: 0,
+  actionsToProve: 0,
 
   setProof: (proof) => set({ proof }),
   setIsInitialized: (isInitialized) => set({ isInitialized }),
   setIsProving: (isProving) => set({ isProving }),
-  setProofsLeft: (proofsLeft) => set({ proofsLeft }),
+  setActionsToProve: (actionsToProve) => set({ actionsToProve }),
+  rollback: (oldState) => set({ ...oldState }),
 }));
+
+export const cloneState = (store: LibState) => {
+  const clonedStore = structuredClone(store);
+
+  Object.entries(clonedStore).forEach(([key, value]) => {
+    if (typeof value === "function") {
+      delete clonedStore[key as keyof LibState];
+    }
+  });
+};
