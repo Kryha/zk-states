@@ -18,3 +18,15 @@ export const proofsToJSON = (
 ): JsonProof[] => {
   return proofs.filter((p) => !!p).map((p) => p?.toJSON()) as JsonProof[];
 };
+
+export const cloneState = <T extends object>(store: T) => {
+  const clonedStore = structuredClone(store);
+
+  Object.entries(clonedStore).forEach(([key, value]) => {
+    if (typeof value === "function") {
+      delete clonedStore[key as keyof T];
+    }
+  });
+
+  return cloneState;
+};

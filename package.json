@@ -2,6 +2,7 @@
   "name": "zk-states",
   "packageManager": "yarn@3.6.1",
   "version": "0.0.16",
+  "license": "MIT",
   "description": "Verifiable state manager for React based on SnarkyJS & Mina protocol",
   "typesVersions": {
     "<4.0": {
@@ -83,23 +84,22 @@
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "snarkyjs": "^0.12.1",
     "typescript": "^5.1.6",
-    "uuid": "^9.0.0",
     "vite": "^4.4.9",
     "vite-plugin-top-level-await": "^1.3.1",
     "vite-plugin-wasm": "^3.2.2",
     "vitest": "^0.34.1",
     "vitest-canvas-mock": "^0.3.3",
     "vitest-fetch-mock": "^0.2.2",
-    "zod": "^3.21.4",
     "zustand": "^4.3.9"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "snarkyjs": ">=0.11.0",
-    "uuid": ">=9.0.0",
-    "zod": ">=3.21.0",
     "zustand": ">=4.3.9"
   },
-  "license": "MIT"
+  "dependencies": {
+    "uuid": "^9.0.0",
+    "zod": "^3.21.4"
+  }
 }

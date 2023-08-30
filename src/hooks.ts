@@ -1,18 +1,11 @@
 import { useEffect } from "react";
-import { v4 as uuid } from "uuid";
 import { type StateCreator, create } from "zustand";
 import { FailedLocalAssert } from "./assertions";
-import { globals } from "./globals";
-import {
-  type LibState,
-  type LibStateVars,
-  cloneState,
-  useLibStore,
-} from "./store";
-import { wait } from "./utils";
-import { ZkAppWorkerClient } from "./zkAppWorkerClient";
+import { type LibStateVars, useLibStore } from "./store";
+import { cloneState, wait } from "./utils";
+import type { ZkAppWorkerClient } from "./zkAppWorkerClient";
 
-type ZKImpl = <T>(
+type ZKImpl = <T extends object>(
   storeInitializer: StateCreator<T, [], []>,
   workerClient: ZkAppWorkerClient,
 ) => StateCreator<T, [], []>;
@@ -21,31 +14,21 @@ const zkImpl: ZKImpl = (initializer, workerClient) => (set, get, store) => {
   store.setState = (updater, replace) => {
     try {
       set(updater, replace);
-
-      const callId = uuid();
-
-      globals.stateHistory[callId] = cloneState(get() as LibState);
-
-      workerClient.callAssertions({
-        callId,
-        methods: globals.latestAssertions,
-      });
+      const oldState = cloneState(get());
+      workerClient.callAssertions(oldState);
     } catch (error) {
       if (error instanceof FailedLocalAssert) return;
     }
-    globals.latestAssertions = [];
   };
 
   return initializer(store.setState, get, store);
 };
 
 export const createZKState = <T extends object>(
-  worker: Worker,
+  workerClient: ZkAppWorkerClient,
   createState: StateCreator<T, [], []>,
 ) => {
-  const zkAppWorkerClient = new ZkAppWorkerClient(worker);
-
-  const useZKStore = create<T>(zkImpl(createState, zkAppWorkerClient));
+  const useZKStore = create<T>(zkImpl(createState, workerClient));
 
   const useInitZKStore = () => {
     const isInitialized = useLibStore((state) => state.isInitialized);
@@ -64,7 +47,7 @@ export const createZKState = <T extends object>(
         // waiting so that the worker starts before this gets executed
         await wait(4000);
 
-        const { proof } = await zkAppWorkerClient.init({}, (workerRes) => {
+        const { proof } = await workerClient.init((workerRes) => {
           switch (workerRes.updateType) {
             case "latestProof": {
               setProof(workerRes.data);
@@ -79,13 +62,13 @@ export const createZKState = <T extends object>(
               break;
             }
             case "proofError": {
-              const oldState = globals.stateHistory[workerRes.callId];
-              globals.stateHistory = {};
+              const oldState = workerClient.getState(workerRes.callId);
               rollback(oldState as LibStateVars);
+              workerClient.clearHistory();
               break;
             }
             case "proofSuccess": {
-              delete globals.stateHistory[workerRes.callId];
+              workerClient.deleteState(workerRes.callId);
               break;
             }
           }

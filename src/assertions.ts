@@ -1,5 +1,5 @@
-import { globals } from "./globals";
 import type { AssertMethod } from "./types";
+import type { ZkAppWorkerClient } from "./zkAppWorkerClient";
 
 export class FailedLocalAssert extends Error {
   methodName?: AssertMethod;
@@ -21,12 +21,12 @@ const parseNumericArgs = (a: Numeric, b: Numeric) => {
   return methodArgs;
 };
 
-export const zkAssert = {
+export const createZKAssert = (workerClient: ZkAppWorkerClient) => ({
   numeric: {
     equals: (a: Numeric, b: Numeric) => {
       if (a === b) {
         const args = parseNumericArgs(a, b);
-        globals.latestAssertions.push({ name: "fieldEquals", args });
+        workerClient.queueAssertions([{ name: "fieldEquals", args }]);
       } else {
         throw new FailedLocalAssert("fieldEquals");
       }
@@ -35,10 +35,12 @@ export const zkAssert = {
     notEquals: (a: Numeric, b: Numeric) => {
       if (a !== b) {
         const args = parseNumericArgs(a, b);
-        globals.latestAssertions.push({
-          name: "fieldNotEquals",
-          args,
-        });
+        workerClient.queueAssertions([
+          {
+            name: "fieldNotEquals",
+            args,
+          },
+        ]);
       } else {
         throw new FailedLocalAssert("fieldNotEquals");
       }
@@ -47,10 +49,12 @@ export const zkAssert = {
     greaterThan: (a: Numeric, b: Numeric) => {
       if (a > b) {
         const args = parseNumericArgs(a, b);
-        globals.latestAssertions.push({
-          name: "fieldGreaterThan",
-          args,
-        });
+        workerClient.queueAssertions([
+          {
+            name: "fieldGreaterThan",
+            args,
+          },
+        ]);
       } else {
         throw new FailedLocalAssert("fieldGreaterThan");
       }
@@ -59,10 +63,12 @@ export const zkAssert = {
     greaterThanOrEqual: (a: Numeric, b: Numeric) => {
       if (a >= b) {
         const args = parseNumericArgs(a, b);
-        globals.latestAssertions.push({
-          name: "fieldGreaterThanOrEqual",
-          args,
-        });
+        workerClient.queueAssertions([
+          {
+            name: "fieldGreaterThanOrEqual",
+            args,
+          },
+        ]);
       } else {
         throw new FailedLocalAssert("fieldGreaterThanOrEqual");
       }
@@ -71,10 +77,12 @@ export const zkAssert = {
     lessThan: (a: Numeric, b: Numeric) => {
       if (a < b) {
         const args = parseNumericArgs(a, b);
-        globals.latestAssertions.push({
-          name: "fieldLessThan",
-          args,
-        });
+        workerClient.queueAssertions([
+          {
+            name: "fieldLessThan",
+            args,
+          },
+        ]);
       } else {
         throw new FailedLocalAssert("fieldLessThan");
       }
@@ -83,13 +91,15 @@ export const zkAssert = {
     lessThanOrEqual: (a: Numeric, b: Numeric) => {
       if (a <= b) {
         const args = parseNumericArgs(a, b);
-        globals.latestAssertions.push({
-          name: "fieldLessThanOrEqual",
-          args,
-        });
+        workerClient.queueAssertions([
+          {
+            name: "fieldLessThanOrEqual",
+            args,
+          },
+        ]);
       } else {
         throw new FailedLocalAssert("fieldGreaterThanOrEqual");
       }
     },
   },
-};
+});

@@ -29,13 +29,3 @@ export const useLibStore = create<LibState>((set) => ({
   setActionsToProve: (actionsToProve) => set({ actionsToProve }),
   rollback: (oldState) => set({ ...oldState }),
 }));
-
-export const cloneState = (store: LibState) => {
-  const clonedStore = structuredClone(store);
-
-  Object.entries(clonedStore).forEach(([key, value]) => {
-    if (typeof value === "function") {
-      delete clonedStore[key as keyof LibState];
-    }
-  });
-};
