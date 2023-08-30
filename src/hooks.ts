@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { type StateCreator, create } from "zustand";
 import { FailedLocalAssert } from "./assertions";
-import { type LibStateVars, useLibStore } from "./store";
+import { useLibStore } from "./store";
 import { cloneState, wait } from "./utils";
 import type { ZkAppWorkerClient } from "./zkAppWorkerClient";
 
@@ -28,16 +28,28 @@ export const createZKState = <T extends object>(
   workerClient: ZkAppWorkerClient,
   createState: StateCreator<T, [], []>,
 ) => {
-  const useZKStore = create<T>(zkImpl(createState, workerClient));
+  const useZKStore = create<T & { rollback: (oldState: T) => void }>(
+    zkImpl(
+      (set, get, store) => ({
+        ...createState(set, get, store),
+        rollback: (oldState: T) => set({ ...oldState }),
+      }),
+      workerClient,
+    ),
+  );
 
   const useInitZKStore = () => {
     const isInitialized = useLibStore((state) => state.isInitialized);
 
     const setProof = useLibStore((state) => state.setProof);
     const setIsInitialized = useLibStore((state) => state.setIsInitialized);
-    const setActionsToProve = useLibStore((state) => state.setActionsToProve);
+    const setQueuedAssertions = useLibStore(
+      (state) => state.setQueuedAssertions,
+    );
     const setIsProving = useLibStore((state) => state.setIsProving);
-    const rollback = useLibStore((state) => state.rollback);
+    const resetLibState = useLibStore((state) => state.reset);
+
+    const rollback = useZKStore((state) => state.rollback);
 
     useEffect(() => {
       const init = async () => {
@@ -54,7 +66,7 @@ export const createZKState = <T extends object>(
               break;
             }
             case "updateQueue": {
-              setActionsToProve(workerRes.data);
+              setQueuedAssertions(workerRes.data);
               break;
             }
             case "isProving": {
@@ -63,8 +75,9 @@ export const createZKState = <T extends object>(
             }
             case "proofError": {
               const oldState = workerClient.getState(workerRes.callId);
-              rollback(oldState as LibStateVars);
               workerClient.clearHistory();
+              rollback(oldState as T);
+              resetLibState();
               break;
             }
             case "proofSuccess": {
@@ -80,11 +93,12 @@ export const createZKState = <T extends object>(
       void init();
     }, [
       isInitialized,
+      resetLibState,
       rollback,
+      setQueuedAssertions,
       setIsInitialized,
       setIsProving,
       setProof,
-      setActionsToProve,
     ]);
   };
 

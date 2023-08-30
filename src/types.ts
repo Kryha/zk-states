@@ -17,12 +17,14 @@ export type TransitionFunction = (
   prevProof: AssertProof,
 ) => Promise<AssertProof>;
 
+export interface QueuedAssertion {
+  callId: string;
+  proveFunctions: TransitionFunction[];
+}
+
 export interface WorkerState {
   latestProof?: AssertProof;
-  updateQueue: {
-    callId: string;
-    proveFunctions: TransitionFunction[];
-  }[];
+  updateQueue: QueuedAssertion[];
   isProving: boolean;
 }
 
@@ -48,7 +50,7 @@ interface LatestProofUpdate {
 
 interface UpdateQueueUpdate {
   updateType: "updateQueue";
-  data: number;
+  data: string[];
 }
 
 interface IsProvingUpdate {

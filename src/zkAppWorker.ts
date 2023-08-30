@@ -3,6 +3,7 @@ import { prove } from "./prove";
 import {
   type AssertMethod,
   type AssertProof,
+  type QueuedAssertion,
   type TransitionRes,
   type WorkerState,
   type WorkerStateUpdate,
@@ -10,6 +11,13 @@ import {
 } from "./types";
 
 let post = (res: ZkappWorkerReponse | WorkerStateUpdate) => postMessage(res);
+
+const stringifyUpdateQueue = (assertions: QueuedAssertion[]) => {
+  const res = assertions.flatMap((call) =>
+    call.proveFunctions.flatMap((assertion) => assertion.name),
+  );
+  return res;
+};
 
 const state: WorkerState = {
   updateQueue: [],
@@ -40,6 +48,10 @@ setInterval(async () => {
         updateType: "latestProof",
         data: localProof.toJSON(),
       });
+      post({
+        updateType: "updateQueue",
+        data: stringifyUpdateQueue(state.updateQueue),
+      });
     } catch (error) {
       console.warn("Update queue error:", error);
 
@@ -67,10 +79,6 @@ setInterval(async () => {
   post({
     updateType: "isProving",
     data: state.isProving,
-  });
-  post({
-    updateType: "updateQueue",
-    data: state.updateQueue.length,
   });
 }, 3000);
 
@@ -111,7 +119,7 @@ const workerFunctions = {
 
     post({
       updateType: "updateQueue",
-      data: state.updateQueue.length,
+      data: stringifyUpdateQueue(state.updateQueue),
     });
   },
 };
