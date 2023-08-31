@@ -52,7 +52,7 @@ setInterval(() => {
       });
     })
     .catch((err) => {
-      logger.warn("Update queue error:", err);
+      logger.error("Update queue error:", err);
       state.isProving = false;
     });
 }, 3000);
