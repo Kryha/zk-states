@@ -13,8 +13,8 @@ type ZKImpl = <T extends object>(
 const zkImpl: ZKImpl = (initializer, workerClient) => (set, get, store) => {
   store.setState = (updater, replace) => {
     try {
-      set(updater, replace);
       const oldState = cloneState(get());
+      set(updater, replace);
       workerClient.callAssertions(oldState);
     } catch (error) {
       if (error instanceof FailedLocalAssert) return;
@@ -104,11 +104,16 @@ export const createZKState = <T extends object>(
 
   const useProof = () => useLibStore((state) => state.proof);
   const useIsInitialized = () => useLibStore((state) => state.isInitialized);
+  const useQueuedAssertions = () =>
+    useLibStore((state) => state.queuedAssertions);
+  const useIsProving = () => useLibStore((state) => state.isProving);
 
   return {
-    useInitZKStore,
     useZKStore,
+    useInitZKStore,
     useProof,
     useIsInitialized,
+    useQueuedAssertions,
+    useIsProving,
   };
 };

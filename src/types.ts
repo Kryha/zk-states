@@ -19,7 +19,10 @@ export type TransitionFunction = (
 
 export interface QueuedAssertion {
   callId: string;
-  proveFunctions: TransitionFunction[];
+  proveFunctions: {
+    name: AssertMethod;
+    method: TransitionFunction;
+  }[];
 }
 
 export interface WorkerState {

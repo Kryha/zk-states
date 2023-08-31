@@ -20,7 +20,7 @@ export const proofsToJSON = (
 };
 
 export const cloneState = <T extends object>(store: T) => {
-  const clonedStore = structuredClone(store);
+  const clonedStore = Object.assign({}, store);
 
   Object.entries(clonedStore).forEach(([key, value]) => {
     if (typeof value === "function") {
@@ -28,5 +28,5 @@ export const cloneState = <T extends object>(store: T) => {
     }
   });
 
-  return cloneState;
+  return clonedStore;
 };

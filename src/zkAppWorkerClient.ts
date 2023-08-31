@@ -70,13 +70,15 @@ export class ZkAppWorkerClient {
     return result;
   }
 
-  async callAssertions<T extends object>(oldState: T) {
+  callAssertions<T extends object>(oldState: T) {
+    if (!this.latestAssertions.length) return;
+
     const callId = uuid();
     const args: CallAssertionArgs = { callId, methods: this.latestAssertions };
 
     this.stateHistory[callId] = oldState;
 
-    await this.call("callAssertions", args);
+    this.call("callAssertions", args);
 
     this.latestAssertions = [];
   }

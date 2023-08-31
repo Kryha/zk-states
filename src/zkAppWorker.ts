@@ -40,57 +40,62 @@ setInterval(async () => {
   });
 
   let localProof = state.latestProof;
+  let hasSucceeded = true;
+
   for (const prove of proveFunctions) {
-    try {
-      localProof = await prove(localProof);
+    if (hasSucceeded) {
+      try {
+        localProof = await prove.method(localProof);
 
-      post({
-        updateType: "latestProof",
-        data: localProof.toJSON(),
-      });
-      post({
-        updateType: "updateQueue",
-        data: stringifyUpdateQueue(state.updateQueue),
-      });
-    } catch (error) {
-      console.warn("Update queue error:", error);
+        post({
+          updateType: "latestProof",
+          data: localProof.toJSON(),
+        });
+      } catch (error) {
+        console.warn("Update queue error:", error);
 
-      localProof = state.latestProof;
-      state.updateQueue = [];
-      state.isProving = false;
+        hasSucceeded = false;
+        state.updateQueue = [];
 
-      post({ updateType: "proofError", callId });
-      post({
-        updateType: "latestProof",
-        data: localProof.toJSON(),
-      });
-
-      break;
+        post({ updateType: "proofError", callId });
+        post({
+          updateType: "latestProof",
+          data: state.latestProof.toJSON(),
+        });
+      }
     }
   }
 
-  state.latestProof = localProof;
-  state.isProving = false;
+  if (hasSucceeded) {
+    state.latestProof = localProof;
 
-  post({
-    updateType: "proofSuccess",
-    callId,
-  });
+    post({
+      updateType: "proofSuccess",
+      callId,
+    });
+    post({
+      updateType: "updateQueue",
+      data: stringifyUpdateQueue(state.updateQueue),
+    });
+  }
+
+  state.isProving = false;
   post({
     updateType: "isProving",
     data: state.isProving,
   });
 }, 3000);
 
-const generateAssertion =
-  (methodName: AssertMethod, methodArgs: string[]) =>
-  async (prevProof: AssertProof) => {
+const generateAssertion = (methodName: AssertMethod, methodArgs: string[]) => {
+  const method = async (prevProof: AssertProof) => {
     console.info("[zk-states worker] creating update proof...");
     const proof = await prove(prevProof, methodName, methodArgs);
-    console.info("[zk-states worker] update proof generated:", proof.toJSON());
+    console.info("[zk-states worker] update proof generated");
 
     return proof;
   };
+  return { name: methodName, method };
+};
 
 const workerFunctions = {
   init: async (_args: unknown): Promise<TransitionRes> => {
