@@ -87,6 +87,7 @@ describe("prove", () => {
         expect(isProving.current).toBe(true);
         expect(queuedAssertions.current).toStrictEqual(expectedUpdateQueue);
       },
+      // TODO: benchmark proof generation time and use that as reference
       { timeout: 300000 },
     );
 
@@ -108,5 +109,6 @@ describe("prove", () => {
     );
   });
 
+  // TODO: force program failure and test unhappy path
   // it("rolls back successfully on failure", async () => {});
 });
