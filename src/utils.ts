@@ -22,11 +22,12 @@ export const proofsToJSON = (
 export const cloneState = <T extends object>(store: T) => {
   const clonedStore = Object.assign({}, store);
 
-  Object.entries(clonedStore).forEach(([key, value]) => {
-    if (typeof value === "function") {
-      delete clonedStore[key as keyof T];
-    }
-  });
+  const filteredStore: Record<string, unknown> = Object.entries(
+    clonedStore,
+  ).reduce((acc, [key, value]) => {
+    if (typeof value === "function") return acc;
+    return { ...acc, [key]: value };
+  }, {});
 
-  return clonedStore;
+  return filteredStore;
 };
