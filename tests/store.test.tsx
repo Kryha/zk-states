@@ -38,6 +38,7 @@ const {
   useIsInitialized,
   useQueuedAssertions,
   useIsProving,
+  useProofFailed,
 } = createZKState<ZKState>(workerClient, (set) => ({
   testLessThan: 0,
   testLessThanOrEqual: 0,
@@ -91,6 +92,7 @@ describe("createZKState", () => {
     expect(useIsInitialized).toBeDefined();
     expect(useQueuedAssertions).toBeDefined();
     expect(useIsProving).toBeDefined();
+    expect(useProofFailed).toBeDefined();
   });
 
   it("returns the correct initial global state values", async () => {

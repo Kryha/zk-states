@@ -48,6 +48,7 @@ export const createZKState = <T extends object>(
     );
     const setIsProving = useLibStore((state) => state.setIsProving);
     const resetLibState = useLibStore((state) => state.reset);
+    const setProofFailed = useLibStore((state) => state.setProofFailed);
 
     const rollback = useZKStore((state) => state.rollback);
 
@@ -78,10 +79,12 @@ export const createZKState = <T extends object>(
               workerClient.clearHistory();
               rollback(oldState as T);
               resetLibState();
+              setProofFailed(true);
               break;
             }
             case "proofSuccess": {
               workerClient.deleteState(workerRes.callId);
+              setProofFailed(false);
               break;
             }
           }
@@ -99,6 +102,7 @@ export const createZKState = <T extends object>(
       setIsInitialized,
       setIsProving,
       setProof,
+      setProofFailed,
     ]);
   };
 
@@ -107,6 +111,7 @@ export const createZKState = <T extends object>(
   const useQueuedAssertions = () =>
     useLibStore((state) => state.queuedAssertions);
   const useIsProving = () => useLibStore((state) => state.isProving);
+  const useProofFailed = () => useLibStore((state) => state.proofFailed);
 
   return {
     useZKStore,
@@ -115,5 +120,6 @@ export const createZKState = <T extends object>(
     useIsInitialized,
     useQueuedAssertions,
     useIsProving,
+    useProofFailed,
   };
 };

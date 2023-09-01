@@ -5,6 +5,7 @@ export interface LibStateVars {
   proof?: JsonProof;
   isInitialized: boolean;
   isProving: boolean;
+  proofFailed: boolean;
   queuedAssertions: string[];
 }
 
@@ -13,6 +14,7 @@ export interface LibStateActions {
   setIsInitialized: (isInitialized: boolean) => void;
   setIsProving: (isProving: boolean) => void;
   setQueuedAssertions: (assertions: string[]) => void;
+  setProofFailed: (proofFailed: boolean) => void;
   reset: () => void;
 }
 
@@ -22,10 +24,13 @@ export const useLibStore = create<LibState>((set) => ({
   isInitialized: false,
   isProving: false,
   queuedAssertions: [],
+  hasBeenReset: false,
+  proofFailed: false,
 
   setProof: (proof) => set({ proof }),
   setIsInitialized: (isInitialized) => set({ isInitialized }),
   setIsProving: (isProving) => set({ isProving }),
   setQueuedAssertions: (queuedAssertions) => set({ queuedAssertions }),
+  setProofFailed: (proofFailed) => set({ proofFailed }),
   reset: () => set({ queuedAssertions: [] }),
 }));

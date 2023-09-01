@@ -28,6 +28,7 @@ const {
   useIsInitialized,
   useQueuedAssertions,
   useIsProving,
+  useProofFailed,
 } = createZKState<ZKState>(workerClient, (set) => ({
   num: 0,
   setNum: (num) =>
@@ -75,6 +76,7 @@ describe("rollback", () => {
     );
     const { result: isProving } = renderHook(() => useIsProving());
     const { result: proof } = renderHook(() => useProof());
+    const { result: proofFailed } = renderHook(() => useProofFailed());
 
     const set = (value: number) =>
       act(() => {
@@ -101,6 +103,7 @@ describe("rollback", () => {
       },
       { timeout: 300000 },
     );
+    expect(proofFailed.current).toBe(false);
 
     set(2);
     expect(num.current).toBe(2);
@@ -168,5 +171,20 @@ describe("rollback", () => {
     expect(num.current).toBe(2);
     expect(proof.current).toBeDefined();
     expect(isProving.current).toBe(false);
+    expect(proofFailed.current).toBe(true);
+
+    set(3);
+    expect(num.current).toBe(3);
+
+    await waitFor(
+      () => {
+        expect(queuedAssertions.current).toStrictEqual([]);
+      },
+      { timeout: 300000 },
+    );
+    expect(num.current).toBe(3);
+    expect(proof.current).toBeDefined();
+    expect(isProving.current).toBe(false);
+    expect(proofFailed.current).toBe(false);
   });
 });
