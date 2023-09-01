@@ -31,3 +31,23 @@ export const cloneState = <T extends object>(store: T) => {
 
   return filteredStore;
 };
+
+// TODO: update rollup config to replace `import.meta.ENV` with `process.env.NODE_ENV`
+const isDevEnv = () => {
+  return process.env.NODE_ENV === "development";
+};
+
+export const logger = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  warn(message?: string, ...args: any[]) {
+    if (isDevEnv()) console.warn(message, args);
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  info(message?: string, ...args: any[]) {
+    if (isDevEnv()) console.info(message, args);
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error(message?: string, ...args: any[]) {
+    if (isDevEnv()) console.error(message, args);
+  },
+};

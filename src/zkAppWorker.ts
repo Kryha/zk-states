@@ -9,6 +9,7 @@ import {
   type WorkerStateUpdate,
   callAssertionArgsSchema,
 } from "./types";
+import { logger } from "./utils";
 
 let post = (res: ZkappWorkerReponse | WorkerStateUpdate) => postMessage(res);
 
@@ -52,7 +53,7 @@ setInterval(async () => {
           data: localProof.toJSON(),
         });
       } catch (error) {
-        console.warn("Update queue error:", error);
+        logger.error("Update queue error:", error);
 
         hasSucceeded = false;
         state.updateQueue = [];
@@ -89,9 +90,9 @@ setInterval(async () => {
 
 const generateAssertion = (methodName: AssertMethod, methodArgs: string[]) => {
   const method = async (prevProof: AssertProof) => {
-    console.info("[zk-states worker] creating update proof...");
+    logger.info("[zk-states worker] creating update proof...");
     const proof = await prove(prevProof, methodName, methodArgs);
-    console.info("[zk-states worker] update proof generated");
+    logger.info("[zk-states worker] update proof generated");
 
     return proof;
   };
@@ -100,14 +101,14 @@ const generateAssertion = (methodName: AssertMethod, methodArgs: string[]) => {
 
 const workerFunctions = {
   init: async (_args: unknown): Promise<TransitionRes> => {
-    console.info("[zk-states worker] compiling program...");
+    logger.info("[zk-states worker] compiling program...");
     await Assert.compile();
-    console.info("[zk-states worker] program compiled");
+    logger.info("[zk-states worker] program compiled");
 
-    console.info("[zk-states worker] creating init proof...");
+    logger.info("[zk-states worker] creating init proof...");
     const creationProof = await Assert.init();
     state.latestProof = creationProof;
-    console.info("[zk-states worker] init done");
+    logger.info("[zk-states worker] init done");
 
     return { proof: creationProof.toJSON() };
   },
@@ -153,7 +154,7 @@ const onMessage = async (event: MessageEvent<ZkappWorkerRequest>) => {
     };
     post(message);
   } catch (error) {
-    console.warn("Worker Error:", error);
+    logger.error("Worker Error:", error);
   }
 };
 
@@ -163,7 +164,7 @@ const onMessage = async (event: MessageEvent<ZkappWorkerRequest>) => {
  * @param testRef reference to the worker file when testing the library, do not use when developing
  */
 export const initZKWorker = (testRef?: Window & typeof globalThis) => {
-  console.info("[zk-states worker] adding event listener");
+  logger.info("[zk-states worker] adding event listener");
 
   if (testRef) {
     post = (res: ZkappWorkerReponse | WorkerStateUpdate) =>
@@ -173,6 +174,5 @@ export const initZKWorker = (testRef?: Window & typeof globalThis) => {
   } else {
     onmessage = onMessage;
   }
-
-  console.info("[zk-states worker] added worker service listener.");
+  logger.info("[zk-states worker] added worker service listener.");
 };
