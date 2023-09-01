@@ -7,11 +7,11 @@ import {
   createZKAssert,
   createZKState,
 } from "zk-states";
-import type { AssertMethod } from "zk-states/types";
 
 interface ZKState {
   num: number;
   setNum: (num: number) => void;
+  setNumFail: (num: number) => void;
 }
 
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {
@@ -36,9 +36,15 @@ const {
       zkAssert.numeric.lessThanOrEqual(num, 5);
       return { num };
     }),
+  setNumFail: (num) =>
+    set(() => {
+      zkAssert.numeric.equalsNoLocalCheck(num, 5);
+      zkAssert.numeric.lessThanOrEqual(num, 5);
+      return { num };
+    }),
 }));
 
-describe("prove", () => {
+describe("rollback", () => {
   beforeAll(async () => {
     const { result: resProof } = renderHook(() => useProof());
     const { result: resIsInitialized } = renderHook(() => useIsInitialized());
@@ -56,10 +62,13 @@ describe("prove", () => {
     expect(resProof.current).toBeDefined();
   });
 
-  it("executes proofs successfully", async () => {
+  it("rolls back successfully on failure", async () => {
     const { result: num } = renderHook(() => useZKStore((state) => state.num));
     const { result: setNum } = renderHook(() =>
       useZKStore((state) => state.setNum),
+    );
+    const { result: setNumFail } = renderHook(() =>
+      useZKStore((state) => state.setNumFail),
     );
     const { result: queuedAssertions } = renderHook(() =>
       useQueuedAssertions(),
@@ -67,14 +76,14 @@ describe("prove", () => {
     const { result: isProving } = renderHook(() => useIsProving());
     const { result: proof } = renderHook(() => useProof());
 
-    const expectedUpdateQueue: AssertMethod[] = [
-      "fieldGreaterThanOrEqual",
-      "fieldLessThanOrEqual",
-    ];
-
     const set = (value: number) =>
       act(() => {
         setNum.current(value);
+      });
+
+    const setFail = (value: number) =>
+      act(() => {
+        setNumFail.current(value);
       });
 
     expect(num.current).toBe(0);
@@ -85,27 +94,79 @@ describe("prove", () => {
     await waitFor(
       () => {
         expect(isProving.current).toBe(true);
-        expect(queuedAssertions.current).toStrictEqual(expectedUpdateQueue);
+        expect(queuedAssertions.current).toStrictEqual([
+          "fieldGreaterThanOrEqual",
+          "fieldLessThanOrEqual",
+        ]);
       },
-      // TODO: benchmark proof generation time and use that as reference
       { timeout: 300000 },
     );
 
-    set(-1);
-    expect(num.current).toBe(1);
-    expect(queuedAssertions.current).toStrictEqual(expectedUpdateQueue);
+    set(2);
+    expect(num.current).toBe(2);
 
-    set(6);
-    expect(num.current).toBe(1);
-    expect(queuedAssertions.current).toStrictEqual(expectedUpdateQueue);
+    await waitFor(
+      () => {
+        expect(queuedAssertions.current).toStrictEqual([
+          "fieldGreaterThanOrEqual",
+          "fieldLessThanOrEqual",
+
+          "fieldGreaterThanOrEqual",
+          "fieldLessThanOrEqual",
+        ]);
+      },
+      { timeout: 300000 },
+    );
+
+    setFail(3);
+    expect(num.current).toBe(3);
+
+    await waitFor(
+      () => {
+        expect(queuedAssertions.current).toStrictEqual([
+          "fieldGreaterThanOrEqual",
+          "fieldLessThanOrEqual",
+
+          "fieldGreaterThanOrEqual",
+          "fieldLessThanOrEqual",
+
+          "fieldEquals",
+          "fieldLessThanOrEqual",
+        ]);
+      },
+      { timeout: 300000 },
+    );
+
+    set(4);
+    expect(num.current).toBe(4);
+
+    await waitFor(
+      () => {
+        expect(queuedAssertions.current).toStrictEqual([
+          "fieldGreaterThanOrEqual",
+          "fieldLessThanOrEqual",
+
+          "fieldGreaterThanOrEqual",
+          "fieldLessThanOrEqual",
+
+          "fieldEquals",
+          "fieldLessThanOrEqual",
+
+          "fieldGreaterThanOrEqual",
+          "fieldLessThanOrEqual",
+        ]);
+      },
+      { timeout: 300000 },
+    );
 
     await waitFor(
       () => {
         expect(queuedAssertions.current).toStrictEqual([]);
-        expect(proof.current).toBeDefined();
-        expect(isProving.current).toBe(false);
       },
       { timeout: 300000 },
     );
+    expect(num.current).toBe(2);
+    expect(proof.current).toBeDefined();
+    expect(isProving.current).toBe(false);
   });
 });

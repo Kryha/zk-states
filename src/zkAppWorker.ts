@@ -29,7 +29,7 @@ setInterval(async () => {
     return;
   }
 
-  const nextUpdate = state.updateQueue.shift();
+  const nextUpdate = state.updateQueue.at(0);
   if (!nextUpdate) return;
   const { callId, proveFunctions } = nextUpdate;
 
@@ -67,6 +67,7 @@ setInterval(async () => {
   }
 
   if (hasSucceeded) {
+    state.updateQueue.shift();
     state.latestProof = localProof;
 
     post({
@@ -120,7 +121,7 @@ const workerFunctions = {
       generateAssertion(name, args),
     );
 
-    state.updateQueue.unshift({ callId, proveFunctions });
+    state.updateQueue.push({ callId, proveFunctions });
 
     post({
       updateType: "updateQueue",

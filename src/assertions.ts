@@ -101,5 +101,18 @@ export const createZKAssert = (workerClient: ZkAppWorkerClient) => ({
         throw new FailedLocalAssert("fieldGreaterThanOrEqual");
       }
     },
+
+    /**
+     * @deprecated this method is for testing purposes only
+     */
+    equalsNoLocalCheck: (a: Numeric, b: Numeric) => {
+      const args = parseNumericArgs(a, b);
+      workerClient.queueAssertions([
+        {
+          name: "fieldEquals",
+          args,
+        },
+      ]);
+    },
   },
 });
