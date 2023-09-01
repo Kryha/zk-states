@@ -17,15 +17,28 @@ export type TransitionFunction = (
   prevProof: AssertProof,
 ) => Promise<AssertProof>;
 
+export interface QueuedAssertion {
+  callId: string;
+  proveFunctions: {
+    name: AssertMethod;
+    method: TransitionFunction;
+  }[];
+}
+
 export interface WorkerState {
   latestProof?: AssertProof;
-  updateQueue: TransitionFunction[];
+  updateQueue: QueuedAssertion[];
   isProving: boolean;
 }
 
+export const assertMethodsPayloadSchema = z.array(
+  z.object({ name: assertMethodSchema, args: z.array(z.string()) }),
+);
+export type AssertMethodsPayload = z.infer<typeof assertMethodsPayloadSchema>;
+
 export const callAssertionArgsSchema = z.object({
-  methodName: assertMethodSchema,
-  methodArgs: z.array(z.string()),
+  callId: z.string().uuid(),
+  methods: assertMethodsPayloadSchema,
 });
 export type CallAssertionArgs = z.infer<typeof callAssertionArgsSchema>;
 
@@ -40,7 +53,7 @@ interface LatestProofUpdate {
 
 interface UpdateQueueUpdate {
   updateType: "updateQueue";
-  data: number;
+  data: string[];
 }
 
 interface IsProvingUpdate {
@@ -48,7 +61,19 @@ interface IsProvingUpdate {
   data: boolean;
 }
 
+interface ProofErrorUpdate {
+  updateType: "proofError";
+  callId: string;
+}
+
+interface ProofSuccessUpdate {
+  updateType: "proofSuccess";
+  callId: string;
+}
+
 export type WorkerStateUpdate =
   | LatestProofUpdate
   | UpdateQueueUpdate
-  | IsProvingUpdate;
+  | IsProvingUpdate
+  | ProofErrorUpdate
+  | ProofSuccessUpdate;

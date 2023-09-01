@@ -2,7 +2,11 @@ import "@vitest/web-worker";
 import { renderHook, waitFor } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import { beforeAll, describe, expect, it } from "vitest";
-import { ZkAppWorkerClient, createZKAssert, createZKState } from "zk-states";
+import {
+  createZKAppWorkerClient,
+  createZKAssert,
+  createZKState,
+} from "zk-states";
 
 interface ZKState {
   testLessThan: number;
@@ -23,62 +27,72 @@ interface ZKState {
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {
   type: "module",
 });
-const workerClient = new ZkAppWorkerClient(worker);
 
+const workerClient = createZKAppWorkerClient(worker);
 const zkAssert = createZKAssert(workerClient);
 
-const { useInitZKStore, useZKStore, useProof, useIsInitialized } =
-  createZKState<ZKState>(workerClient, (set) => ({
-    testLessThan: 0,
-    testLessThanOrEqual: 0,
-    testGreaterThan: 0,
-    testGreaterThanOrEqual: 0,
-    testEquals: 0,
-    testNotEquals: 0,
+const {
+  useZKStore,
+  useInitZKStore,
+  useProof,
+  useIsInitialized,
+  useQueuedAssertions,
+  useIsProving,
+  useProofFailed,
+} = createZKState<ZKState>(workerClient, (set) => ({
+  testLessThan: 0,
+  testLessThanOrEqual: 0,
+  testGreaterThan: 0,
+  testGreaterThanOrEqual: 0,
+  testEquals: 0,
+  testNotEquals: 0,
 
-    setTestLessThan: (num) =>
-      set(() => {
-        zkAssert.numeric.lessThan(num, 5);
-        return { testLessThan: num };
-      }),
+  setTestLessThan: (num) =>
+    set(() => {
+      zkAssert.numeric.lessThan(num, 5);
+      return { testLessThan: num };
+    }),
 
-    setTestLessThanOrEqual: (num) =>
-      set(() => {
-        zkAssert.numeric.lessThanOrEqual(num, 5);
-        return { testLessThanOrEqual: num };
-      }),
+  setTestLessThanOrEqual: (num) =>
+    set(() => {
+      zkAssert.numeric.lessThanOrEqual(num, 5);
+      return { testLessThanOrEqual: num };
+    }),
 
-    setTestGreaterThan: (num) =>
-      set(() => {
-        zkAssert.numeric.greaterThan(num, 5);
-        return { testGreaterThan: num };
-      }),
+  setTestGreaterThan: (num) =>
+    set(() => {
+      zkAssert.numeric.greaterThan(num, 5);
+      return { testGreaterThan: num };
+    }),
 
-    setTestGreaterThanOrEqual: (num) =>
-      set(() => {
-        zkAssert.numeric.greaterThanOrEqual(num, 5);
-        return { testGreaterThanOrEqual: num };
-      }),
+  setTestGreaterThanOrEqual: (num) =>
+    set(() => {
+      zkAssert.numeric.greaterThanOrEqual(num, 5);
+      return { testGreaterThanOrEqual: num };
+    }),
 
-    setTestEquals: (num) =>
-      set(() => {
-        zkAssert.numeric.equals(num, 5);
-        return { testEquals: num };
-      }),
+  setTestEquals: (num) =>
+    set(() => {
+      zkAssert.numeric.equals(num, 5);
+      return { testEquals: num };
+    }),
 
-    setTestNotEquals: (num) =>
-      set(() => {
-        zkAssert.numeric.notEquals(num, 5);
-        return { testNotEquals: num };
-      }),
-  }));
+  setTestNotEquals: (num) =>
+    set(() => {
+      zkAssert.numeric.notEquals(num, 5);
+      return { testNotEquals: num };
+    }),
+}));
 
 describe("createZKState", () => {
   it("returns the expected hooks", () => {
-    expect(useInitZKStore).toBeDefined();
     expect(useZKStore).toBeDefined();
+    expect(useInitZKStore).toBeDefined();
     expect(useProof).toBeDefined();
     expect(useIsInitialized).toBeDefined();
+    expect(useQueuedAssertions).toBeDefined();
+    expect(useIsProving).toBeDefined();
+    expect(useProofFailed).toBeDefined();
   });
 
   it("returns the correct initial global state values", async () => {
@@ -128,7 +142,7 @@ describe("createZKState", () => {
   });
 });
 
-describe("createZKAssert", () => {
+describe("zkAssert", () => {
   beforeAll(async () => {
     const { result: resProof } = renderHook(() => useProof());
     const { result: resIsInitialized } = renderHook(() => useIsInitialized());

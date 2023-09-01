@@ -3,6 +3,7 @@ import { prove } from "./prove";
 import {
   type AssertMethod,
   type AssertProof,
+  type QueuedAssertion,
   type TransitionRes,
   type WorkerState,
   type WorkerStateUpdate,
@@ -12,19 +13,26 @@ import { logger } from "./utils";
 
 let post = (res: ZkappWorkerReponse | WorkerStateUpdate) => postMessage(res);
 
+const stringifyUpdateQueue = (assertions: QueuedAssertion[]) => {
+  const res = assertions.flatMap((call) =>
+    call.proveFunctions.flatMap((assertion) => assertion.name),
+  );
+  return res;
+};
+
 const state: WorkerState = {
-  // TODO: consider grouping updates if they were called from the same action
   updateQueue: [],
   isProving: false,
 };
 
-setInterval(() => {
+setInterval(async () => {
   if (!state.latestProof || state.isProving || !state.updateQueue.length) {
     return;
   }
 
-  const nextUpdate = state.updateQueue.shift();
+  const nextUpdate = state.updateQueue.at(0);
   if (!nextUpdate) return;
+  const { callId, proveFunctions } = nextUpdate;
 
   state.isProving = true;
   post({
@@ -32,40 +40,64 @@ setInterval(() => {
     data: state.isProving,
   });
 
-  nextUpdate(state.latestProof)
-    .then((proof) => {
-      state.latestProof = proof;
+  let localProof = state.latestProof;
+  let hasSucceeded = true;
 
-      state.isProving = false;
+  for (const prove of proveFunctions) {
+    if (hasSucceeded) {
+      try {
+        localProof = await prove.method(localProof);
 
-      post({
-        updateType: "latestProof",
-        data: state.latestProof.toJSON(),
-      });
-      post({
-        updateType: "isProving",
-        data: state.isProving,
-      });
-      post({
-        updateType: "updateQueue",
-        data: state.updateQueue.length,
-      });
-    })
-    .catch((err) => {
-      logger.error("Update queue error:", err);
-      state.isProving = false;
+        post({
+          updateType: "latestProof",
+          data: localProof.toJSON(),
+        });
+      } catch (error) {
+        logger.error("Update queue error:", error);
+
+        hasSucceeded = false;
+        state.updateQueue = [];
+
+        post({ updateType: "proofError", callId });
+        post({
+          updateType: "latestProof",
+          data: state.latestProof.toJSON(),
+        });
+      }
+    }
+  }
+
+  if (hasSucceeded) {
+    state.updateQueue.shift();
+    state.latestProof = localProof;
+
+    post({
+      updateType: "proofSuccess",
+      callId,
     });
+    post({
+      updateType: "updateQueue",
+      data: stringifyUpdateQueue(state.updateQueue),
+    });
+  }
+
+  state.isProving = false;
+  post({
+    updateType: "isProving",
+    data: state.isProving,
+  });
 }, 3000);
 
-const generateAssertion =
-  (methodName: AssertMethod, methodArgs: string[]) =>
-  async (prevProof: AssertProof) => {
+const generateAssertion = (methodName: AssertMethod, methodArgs: string[]) => {
+  const method = async (prevProof: AssertProof) => {
     logger.info("[zk-states worker] creating update proof...");
     const proof = await prove(prevProof, methodName, methodArgs);
-    logger.info("[zk-states worker] update proof generated:", proof.toJSON());
+    logger.info("[zk-states worker] update proof generated");
 
     return proof;
   };
+  return { name: methodName, method };
+};
 
 const workerFunctions = {
   init: async (_args: unknown): Promise<TransitionRes> => {
@@ -81,16 +113,20 @@ const workerFunctions = {
     return { proof: creationProof.toJSON() };
   },
 
-  callAssertion: (args: unknown) => {
+  callAssertions: (args: unknown) => {
     if (!state.latestProof) return;
 
-    const { methodName, methodArgs } = callAssertionArgsSchema.parse(args);
+    const { methods, callId } = callAssertionArgsSchema.parse(args);
 
-    const prove = generateAssertion(methodName, methodArgs);
-    state.updateQueue.unshift(prove);
+    const proveFunctions = methods.map(({ name, args }) =>
+      generateAssertion(name, args),
+    );
+
+    state.updateQueue.push({ callId, proveFunctions });
+
     post({
       updateType: "updateQueue",
-      data: state.updateQueue.length,
+      data: stringifyUpdateQueue(state.updateQueue),
     });
   },
 };

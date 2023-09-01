@@ -1,4 +1,6 @@
+import { v4 as uuid } from "uuid";
 import type {
+  AssertMethodsPayload,
   CallAssertionArgs,
   TransitionRes,
   WorkerStateUpdate,
@@ -10,21 +12,30 @@ import {
 } from "./zkAppWorker";
 
 export class ZkAppWorkerClient {
-  worker: Worker;
+  private worker: Worker;
 
-  promises: {
+  private promises: {
     [id: number]: {
       resolve: (res: unknown) => void;
       reject: (err: unknown) => void;
     };
   };
 
-  nextId: number;
+  private nextId: number;
+
+  // Key is an uuid that is generated whenever an action gets triggered
+  // value is the state when that action got triggered
+  // when proof succeeds, delete the value of the corresponding key
+  // if proof fails, set the current state to the value present at that key
+  private stateHistory: Record<string, unknown>;
+  private latestAssertions: AssertMethodsPayload;
 
   constructor(worker: Worker) {
     this.worker = worker;
     this.promises = {};
     this.nextId = 0;
+    this.stateHistory = {};
+    this.latestAssertions = [];
   }
 
   private call(fn: WorkerFunctions, args: unknown) {
@@ -43,10 +54,7 @@ export class ZkAppWorkerClient {
     });
   }
 
-  async init(
-    args: unknown,
-    onWorkerStateUpdate?: (workerRes: WorkerStateUpdate) => void,
-  ) {
+  async init(onWorkerStateUpdate?: (workerRes: WorkerStateUpdate) => void) {
     this.worker.onmessage = (
       event: MessageEvent<ZkappWorkerReponse | WorkerStateUpdate>,
     ) => {
@@ -58,11 +66,40 @@ export class ZkAppWorkerClient {
       }
     };
 
-    const result = (await this.call("init", args)) as TransitionRes;
+    const result = (await this.call("init", {})) as TransitionRes;
     return result;
   }
 
-  async callAssertion(args: CallAssertionArgs) {
-    await this.call("callAssertion", args);
+  callAssertions<T extends object>(oldState: T) {
+    if (!this.latestAssertions.length) return;
+
+    const callId = uuid();
+    const args: CallAssertionArgs = { callId, methods: this.latestAssertions };
+
+    this.stateHistory[callId] = oldState;
+
+    this.call("callAssertions", args);
+
+    this.latestAssertions = [];
+  }
+
+  queueAssertions(assertions: AssertMethodsPayload) {
+    this.latestAssertions.push(...assertions);
+  }
+
+  getState(callId: string) {
+    return this.stateHistory[callId];
+  }
+
+  deleteState(callId: string) {
+    delete this.stateHistory[callId];
+  }
+
+  clearHistory() {
+    this.stateHistory = {};
+    this.latestAssertions = [];
   }
 }
+
+export const createZKAppWorkerClient = (worker: Worker) =>
+  new ZkAppWorkerClient(worker);

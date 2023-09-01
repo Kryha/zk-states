@@ -19,7 +19,20 @@ export const proofsToJSON = (
   return proofs.filter((p) => !!p).map((p) => p?.toJSON()) as JsonProof[];
 };
 
-// TODO: update import to use "import.meta.ENV"
+export const cloneState = <T extends object>(store: T) => {
+  const clonedStore = Object.assign({}, store);
+
+  const filteredStore: Record<string, unknown> = Object.entries(
+    clonedStore,
+  ).reduce((acc, [key, value]) => {
+    if (typeof value === "function") return acc;
+    return { ...acc, [key]: value };
+  }, {});
+
+  return filteredStore;
+};
+
+// TODO: update rollup config to replace `import.meta.ENV` with `process.env.NODE_ENV`
 const isDevEnv = () => {
   return process.env.NODE_ENV === "development";
 };

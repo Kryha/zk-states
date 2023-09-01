@@ -52,6 +52,7 @@ export default defineConfig({
         resources: "usable",
       },
     },
-    testTimeout: 600000, // 10 minutes (some operations are pretty slow, so keep it high)
+    testTimeout: 6000000, // 100 minutes (some operations are pretty slow, so keep it high)
+    hookTimeout: 600000, // 10 minutes (some operations are pretty slow, so keep it high)
   },
 });

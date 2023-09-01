@@ -27,13 +27,14 @@ That's it for the worker file!
 You define a ZK State in the following way:
 
 ```ts
-import { ZkAppWorkerClient, createZKAssert, createZKState } from "zk-states";
+import { createZKAppWorkerClient, createZKAssert, createZKState } from "zk-states";
 
 // replace './zkStatesWorker.ts` with the path to the previously defined web worker
 const worker = new Worker(new URL("./zkStatesWorker.ts", import.meta.url), {
   type: "module",
 });
-const workerClient = new ZkAppWorkerClient(worker);
+
+const workerClient = createZKAppWorkerClient(worker);
 
 // creating the assertion library, it needs the `workerClient` in order to perform calls to the ZK program
 const zkAssert = createZKAssert(workerClient);
@@ -51,8 +52,7 @@ const { useInitZKStore, useZKStore, useProof, useIsInitialized } =
           // This assertion checks the requirements of the specified value.
           // If these requirements are met, the local state will be updated optimistically
           // and the proof generation will be queued in the web worker.
-          // In a future implementation, the failure of the proof generation will roll back
-          // to the previous valid state.
+          // The failure of the proof generation will roll back to the previous valid state.
           zkAssert.numeric.lessThanOrEqual(state.num, 5);
 
           return {

@@ -42,12 +42,12 @@ export const prove = (
 
     case "fieldLessThan": {
       const [a, b] = argsToField(methodName, args, 2);
-      return Assert.fieldEquals(previousProof, a, b);
+      return Assert.fieldLessThan(previousProof, a, b);
     }
 
     case "fieldLessThanOrEqual": {
       const [a, b] = argsToField(methodName, args, 2);
-      return Assert.fieldEquals(previousProof, a, b);
+      return Assert.fieldLessThanOrEqual(previousProof, a, b);
     }
   }
 };

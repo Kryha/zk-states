@@ -1,25 +1,36 @@
 import type { JsonProof } from "snarkyjs";
 import { create } from "zustand";
 
-export interface ContractState {
+export interface LibStateVars {
   proof?: JsonProof;
   isInitialized: boolean;
   isProving: boolean;
-  proofsLeft: number;
+  proofFailed: boolean;
+  queuedAssertions: string[];
+}
 
+export interface LibStateActions {
   setProof: (proof: JsonProof) => void;
   setIsInitialized: (isInitialized: boolean) => void;
   setIsProving: (isProving: boolean) => void;
-  setProofsLeft: (proofsLeft: number) => void;
+  setQueuedAssertions: (assertions: string[]) => void;
+  setProofFailed: (proofFailed: boolean) => void;
+  reset: () => void;
 }
 
-export const useContractStore = create<ContractState>((set) => ({
+export type LibState = LibStateVars & LibStateActions;
+
+export const useLibStore = create<LibState>((set) => ({
   isInitialized: false,
   isProving: false,
-  proofsLeft: 0,
+  queuedAssertions: [],
+  hasBeenReset: false,
+  proofFailed: false,
 
   setProof: (proof) => set({ proof }),
   setIsInitialized: (isInitialized) => set({ isInitialized }),
   setIsProving: (isProving) => set({ isProving }),
-  setProofsLeft: (proofsLeft) => set({ proofsLeft }),
+  setQueuedAssertions: (queuedAssertions) => set({ queuedAssertions }),
+  setProofFailed: (proofFailed) => set({ proofFailed }),
+  reset: () => set({ queuedAssertions: [] }),
 }));
