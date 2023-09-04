@@ -1,15 +1,15 @@
 import type { FC } from "react";
-import type { Player } from "../types";
+import type { PlayField } from "../types";
 import "./styles.css";
 
 type Props = {
-  value: Player;
+  value: PlayField;
   onClick: () => void;
 };
 
 export const Square: FC<Props> = ({ value, onClick }) => {
-  const renderIcon = (value: string) => {
-    return value === "X" ? (
+  const renderIcon = (value: number) => {
+    return value === 2 ? (
       <div className={"cross"}></div>
     ) : (
       <div className={"circle"}></div>
@@ -17,7 +17,7 @@ export const Square: FC<Props> = ({ value, onClick }) => {
   };
   return (
     <div className={"square"} onClick={onClick}>
-      {value !== "" && renderIcon(value)}
+      {value !== 0 && renderIcon(value)}
     </div>
   );
 };
