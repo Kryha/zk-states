@@ -1,4 +1,4 @@
-import ReactDOM from "react-dom/client";
-import TicTacToe from "./app.tsx";
+import { createRoot } from "react-dom/client";
+import TicTacToe from "./app";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(<TicTacToe />);
+createRoot(document.getElementById("root")!).render(<TicTacToe />);

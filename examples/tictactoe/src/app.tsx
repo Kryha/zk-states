@@ -1,4 +1,4 @@
-import { Board, HistoryButtons } from "./components/";
+import { Board, HistoryButtons } from "./components";
 import { usePlayerturn } from "./hooks";
 import { useInitZkStore, useZKStore } from "./store";
 import "./styles.css";
