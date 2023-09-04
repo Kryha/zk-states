@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { GameBoard } from "../types";
+import type { FC } from "react";
+import type { GameBoard } from "../types";
 
 interface HistoryButtonsProps {
   history: GameBoard[];

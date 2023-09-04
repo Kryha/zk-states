@@ -1,6 +1,16 @@
 import { produce } from "immer";
-import { createZKState } from "zk-states";
+import { createZKAppWorkerClient, createZKAssert, createZKState } from "zk-states";
 import type { GameBoard, Player } from "../types";
+
+
+const worker = new Worker(new URL("../worker/zkStatesWebWorker.ts", import.meta.url), {
+  type: "module",
+});
+
+const workerClient = createZKAppWorkerClient(worker);
+
+//TODO:: use this variable when there are string assertions avaliable
+const zkAssert = createZKAssert(workerClient);
 
 const EMPTY_BOARD = [{ squares: new Array<Player>(9).fill("") }];
 
@@ -21,32 +31,27 @@ interface ZKState {
   setHistory: (history: GameBoard[]) => void;
 }
 
-export const { useInitZkStore, useZKStore, useGetLatestProof } =
-  createZKState<ZKState>(
-    new Worker(new URL("../worker/zkStatesWebWorker.ts", import.meta.url), {
-      type: "module",
-    }),
-    (set) => ({
-      board: new Array<Player>(9).fill(""),
-      history: EMPTY_BOARD,
-      turnNumber: 0,
-      xIsNext: true,
-      finished: false,
+export const { useInitZKStore, useZKStore, useProof, useIsInitialized } = createZKState<ZKState>(workerClient,
+  (set) => ({
+    board: new Array<Player>(9).fill(""),
+    history: EMPTY_BOARD,
+    turnNumber: 0,
+    xIsNext: true,
+    finished: false,
 
-      newTurn: (turnNumber) => set(() => ({ turnNumber: turnNumber })),
-      setHistory: (history) => set(() => ({ history: history })),
-      clearHistory: () => set(() => ({ history: EMPTY_BOARD })),
-      setXIsNext: () =>
-        set((state) => ({ xIsNext: state.turnNumber % 2 === 0 })),
-      setFinished: (finished) => set(() => ({ finished: finished })),
-      updateBoard: (index, value) => {
-        set(
-          produce((state: ZKState) => {
-            state.board[index] = value;
-          }),
-        );
-      },
-      setBoard: (board) => set(() => ({ board: board })),
-    }),
-    ["board"],
+    newTurn: (turnNumber) => set(() => ({ turnNumber: turnNumber })),
+    setHistory: (history) => set(() => ({ history: history })),
+    clearHistory: () => set(() => ({ history: EMPTY_BOARD })),
+    setXIsNext: () =>
+      set((state) => ({ xIsNext: state.turnNumber % 2 === 0 })),
+    setFinished: (finished) => set(() => ({ finished: finished })),
+    updateBoard: (index, value) => {
+      set(
+        produce((state: ZKState) => {
+          state.board[index] = value;
+        }),
+      );
+    },
+    setBoard: (board) => set(() => ({ board: board })),
+  }),
   );

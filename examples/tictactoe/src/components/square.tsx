@@ -1,5 +1,5 @@
-import React from "react";
-import { Player } from "../types";
+import type { FC } from "react";
+import type { Player } from "../types";
 import "./styles.css";
 
 type Props = {
@@ -7,7 +7,7 @@ type Props = {
   onClick: () => void;
 };
 
-export const Square: React.FC<Props> = ({ value, onClick }) => {
+export const Square: FC<Props> = ({ value, onClick }) => {
   const renderIcon = (value: string) => {
     return value === "X" ? (
       <div className={"cross"}></div>

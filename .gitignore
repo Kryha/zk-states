@@ -19,3 +19,5 @@ coverage/
 .rpt2_cache/
 
 .env
+
+build/
