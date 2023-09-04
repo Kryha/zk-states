@@ -1,12 +1,14 @@
 import { Board, HistoryButtons } from "./components";
+import { Loading } from "./components/loading";
 import { usePlayerturn } from "./hooks";
-import { useInitZKStore, useZKStore } from "./store";
+import { useInitZKStore, useZKStore, useIsInitialized } from "./store";
 import "./styles.css";
 
 export default function TicTacToe() {
   const { jumpTo, playerTurn, status } = usePlayerturn();
   const history = useZKStore((state) => state.history);
   const board = useZKStore((state) => state.board);
+  const isInitialized = useIsInitialized();
 
   useInitZKStore();
 
@@ -16,10 +18,20 @@ export default function TicTacToe() {
 
   return (
     <div className={"outerDiv"}>
-      <Board squares={board} onClick={(i) => handleClick(i)} />
+      <Board
+        enableClick={isInitialized}
+        squares={board}
+        onClick={(i) => handleClick(i)}
+      />
       <div className="game-info">
-        <div>{status}</div>
-        <HistoryButtons history={history} onClick={jumpTo} />
+        {isInitialized ? (
+          <div>
+            <div>{status}</div>
+            <HistoryButtons history={history} onClick={jumpTo} />
+          </div>
+        ) : (
+          <Loading />
+        )}
       </div>
     </div>
   );
