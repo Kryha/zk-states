@@ -1,11 +1,13 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PublicKey } from "snarkyjs";
 import { type StateCreator, create } from "zustand";
 import { FailedLocalAssert } from "./assertions";
 import { useLibStore } from "./store";
 import type { MinaNetwork } from "./types";
-import { cloneState, wait } from "./utils";
+import { TX_FEE, TX_MEMO, cloneState, logger, wait } from "./utils";
 import type { ZkAppWorkerClient } from "./zkAppWorkerClient";
+
+type VerificationStatus = "none" | "pending" | "failure" | "success";
 
 type ZKImpl = <T extends object>(
   storeInitializer: StateCreator<T, [], []>,
@@ -51,7 +53,7 @@ export const createZKState = <T extends object>(
       (state) => state.setQueuedAssertions,
     );
     const setIsProving = useLibStore((state) => state.setIsProving);
-    const resetLibState = useLibStore((state) => state.reset);
+    const resetQueue = useLibStore((state) => state.resetQueue);
     const setProofFailed = useLibStore((state) => state.setProofFailed);
     const setHasWallet = useLibStore((state) => state.setHasWallet);
 
@@ -59,6 +61,7 @@ export const createZKState = <T extends object>(
 
     useEffect(() => {
       const init = async () => {
+        // TODO: handle worker errors
         if (isInitialized) return;
 
         // TODO: find a better way to wait for the worker
@@ -103,7 +106,7 @@ export const createZKState = <T extends object>(
                 const oldState = workerClient.getState(workerRes.callId);
                 workerClient.clearHistory();
                 rollback(oldState as T);
-                resetLibState();
+                resetQueue();
                 setProofFailed(true);
                 break;
               }
@@ -122,7 +125,7 @@ export const createZKState = <T extends object>(
     }, [
       initLibStore,
       isInitialized,
-      resetLibState,
+      resetQueue,
       rollback,
       setHasWallet,
       setIsProving,
@@ -130,6 +133,38 @@ export const createZKState = <T extends object>(
       setProofFailed,
       setQueuedAssertions,
     ]);
+  };
+
+  const useVerify = () => {
+    const [verificationStatus, setVerificationStatus] =
+      useState<VerificationStatus>("none");
+
+    const assertions = useLibStore((state) => state.queuedAssertions);
+    const userPublicKey = useLibStore((state) => state.userPublicKey);
+    const isInitialized = useLibStore((state) => state.isInitialized);
+
+    const verify = useCallback(async () => {
+      if (!userPublicKey || !isInitialized || !window.mina) return;
+      if (assertions.length > 0) return;
+
+      try {
+        setVerificationStatus("pending");
+
+        const { transaction } = await workerClient.verify();
+
+        await window.mina.sendTransaction({
+          transaction,
+          feePayer: { fee: TX_FEE, memo: TX_MEMO },
+        });
+
+        setVerificationStatus("success");
+      } catch (error) {
+        logger.error("Verification error:", error);
+        setVerificationStatus("failure");
+      }
+    }, [assertions.length, isInitialized, userPublicKey]);
+
+    return { verify, verificationStatus };
   };
 
   const useProof = () => useLibStore((state) => state.proof);
@@ -147,5 +182,6 @@ export const createZKState = <T extends object>(
     useQueuedAssertions,
     useIsProving,
     useProofFailed,
+    useVerify,
   };
 };

@@ -23,7 +23,7 @@ export interface LibStateActions {
   setIsProving: (isProving: boolean) => void;
   setQueuedAssertions: (assertions: string[]) => void;
   setProofFailed: (proofFailed: boolean) => void;
-  reset: () => void;
+  resetQueue: () => void;
 }
 
 export type LibState = LibStateVars & LibStateActions;
@@ -44,5 +44,5 @@ export const useLibStore = create<LibState>((set) => ({
   setIsProving: (isProving) => set({ isProving }),
   setQueuedAssertions: (queuedAssertions) => set({ queuedAssertions }),
   setProofFailed: (proofFailed) => set({ proofFailed }),
-  reset: () => set({ queuedAssertions: [] }),
+  resetQueue: () => set({ queuedAssertions: [] }),
 }));
