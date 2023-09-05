@@ -1,17 +1,27 @@
+import { Mina, PublicKey, fetchAccount } from "snarkyjs";
 import { Assert } from "./program";
 import { prove } from "./prove";
 import {
   type AssertMethod,
   type AssertProof,
+  type MinaNetwork,
   type QueuedAssertion,
   type TransitionRes,
+  type TxRes,
   type WorkerState,
   type WorkerStateUpdate,
   callAssertionArgsSchema,
+  fetchAccountArgsSchema,
+  initArgsSchema,
+  setMinaNetworkArgsSchema,
 } from "./types";
 import { logger } from "./utils";
 
 let post = (res: ZkappWorkerReponse | WorkerStateUpdate) => postMessage(res);
+
+const minaEndpoints: Record<MinaNetwork, string> = {
+  berkeley: "https://proxy.berkeley.minaexplorer.com/graphql",
+};
 
 const stringifyUpdateQueue = (assertions: QueuedAssertion[]) => {
   const res = assertions.flatMap((call) =>
@@ -100,7 +110,31 @@ const generateAssertion = (methodName: AssertMethod, methodArgs: string[]) => {
 };
 
 const workerFunctions = {
-  init: async (_args: unknown): Promise<TransitionRes> => {
+  setMinaNetwork: async (args: unknown): Promise<void> => {
+    const { networkName } = setMinaNetworkArgsSchema.parse(args);
+    const network = Mina.Network(minaEndpoints[networkName]);
+    Mina.setActiveInstance(network);
+  },
+
+  fetchAccount: (args: unknown) => {
+    const { publicKey58 } = fetchAccountArgsSchema.parse(args);
+    const publicKey = PublicKey.fromBase58(publicKey58);
+    return fetchAccount({ publicKey });
+  },
+
+  init: async (args: unknown): Promise<TransitionRes> => {
+    const { appPublicKey58 } = initArgsSchema.parse(args);
+
+    const { StatesVerifier } = await import("./contract");
+
+    logger.info("[zk-states worker] compiling contract...");
+    await StatesVerifier.compile();
+    logger.info("[zk-states worker] contract compiled");
+
+    state.statesVerifier = new StatesVerifier(
+      PublicKey.fromBase58(appPublicKey58),
+    );
+
     logger.info("[zk-states worker] compiling program...");
     await Assert.compile();
     logger.info("[zk-states worker] program compiled");
@@ -114,7 +148,7 @@ const workerFunctions = {
   },
 
   callAssertions: (args: unknown) => {
-    if (!state.latestProof) return;
+    if (!state.latestProof) throw new Error("Program not initialized");
 
     const { methods, callId } = callAssertionArgsSchema.parse(args);
 
@@ -128,6 +162,27 @@ const workerFunctions = {
       updateType: "updateQueue",
       data: stringifyUpdateQueue(state.updateQueue),
     });
+  },
+
+  verify: async (_args: unknown): Promise<TxRes> => {
+    if (!state.statesVerifier) throw new Error("Contract not initialized");
+    if (!state.latestProof) throw new Error("No proof to verify");
+    if (state.updateQueue.length !== 0) {
+      throw new Error("Update queue must be empty");
+    }
+
+    const transaction = await Mina.transaction(() => {
+      if (!state.statesVerifier || !state.latestProof) return;
+      state.statesVerifier.verifyProof(state.latestProof);
+    });
+
+    // TODO: do we need to store this generated proof?
+    await transaction.prove();
+
+    // TODO: maybe store the transaction proof instead of resetting
+    state.latestProof = await Assert.init();
+
+    return { transaction: transaction.toJSON() };
   },
 };
 

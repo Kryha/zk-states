@@ -1,5 +1,51 @@
 import type { JsonProof, Proof } from "snarkyjs";
 import { z } from "zod";
+import { type StatesVerifier } from "./contract";
+
+interface SignMessageArgs {
+  message: string;
+}
+
+interface SignedData {
+  publicKey: string;
+  data: string;
+  signature: {
+    field: string;
+    scalar: string;
+  };
+}
+
+type SignFieldsArguments = {
+  message: (string | number)[];
+};
+
+type SignedFieldsData = {
+  data: (string | number)[];
+  signature: string;
+};
+
+interface MinaWallet {
+  requestAccounts: () => Promise<string[]>;
+  sendTransaction: (options: {
+    transaction: string;
+    feePayer?: {
+      fee?: number;
+      memo?: string;
+    };
+  }) => Promise<{ hash: string }>;
+  signMessage: (args: SignMessageArgs) => Promise<SignedData>;
+  signFields: (args: SignFieldsArguments) => Promise<SignedFieldsData>;
+}
+
+declare global {
+  interface Window {
+    mina?: MinaWallet;
+  }
+}
+
+// TODO: add devnet and mainnet
+export const minaNetworkSchema = z.enum(["berkeley"]);
+export type MinaNetwork = z.infer<typeof minaNetworkSchema>;
 
 export type AssertProof = Proof<void, void>;
 
@@ -29,7 +75,21 @@ export interface WorkerState {
   latestProof?: AssertProof;
   updateQueue: QueuedAssertion[];
   isProving: boolean;
+  statesVerifier?: StatesVerifier;
 }
+
+export const setMinaNetworkArgsSchema = z.object({
+  networkName: minaNetworkSchema,
+});
+export type SetMinaNetworkArgs = z.infer<typeof setMinaNetworkArgsSchema>;
+
+export const fetchAccountArgsSchema = z.object({ publicKey58: z.string() });
+export type FetchAccountArgs = z.infer<typeof fetchAccountArgsSchema>;
+
+export const initArgsSchema = z.object({
+  appPublicKey58: z.string(),
+});
+export type InitArgs = z.infer<typeof initArgsSchema>;
 
 export const assertMethodsPayloadSchema = z.array(
   z.object({ name: assertMethodSchema, args: z.array(z.string()) }),
@@ -77,3 +137,7 @@ export type WorkerStateUpdate =
   | IsProvingUpdate
   | ProofErrorUpdate
   | ProofSuccessUpdate;
+
+export interface TxRes {
+  transaction: string;
+}

@@ -22,9 +22,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "yarn clean && yarn build:js && yarn build:types",
-    "build:js": "rollup -c",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build": "yarn clean && rollup -c",
     "prettier": "prettier \"*.{js,json,md}\" \"{examples,src,tests,docs}/**/*.{js,jsx,ts,tsx,md,mdx}\" --write",
     "prettier:ci": "prettier '*.{js,json,md}' '{examples,src,tests,docs}/**/*.{js,jsx,ts,tsx,md,mdx}' --list-different",
     "eslint": "eslint --no-eslintrc --c .eslintrc.json --fix '*.{js,json}' '{src,tests}/**/*.{ts,tsx}'",
