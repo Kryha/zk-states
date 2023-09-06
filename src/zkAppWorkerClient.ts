@@ -1,4 +1,4 @@
-import type { fetchAccount } from "snarkyjs";
+import type { fetchAccount } from "o1js";
 import { v4 as uuid } from "uuid";
 import type {
   AssertMethodsPayload,

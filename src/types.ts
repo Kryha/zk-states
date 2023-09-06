@@ -1,4 +1,4 @@
-import type { JsonProof, SelfProof } from "snarkyjs";
+import type { JsonProof, SelfProof } from "o1js";
 import { z } from "zod";
 import { type StatesVerifier } from "./contract";
 

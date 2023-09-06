@@ -7,7 +7,7 @@ const extensions = [".js", ".jsx", ".ts", ".tsx"];
 const globals = {
   react: "React",
   "react-dom": "ReactDOM",
-  snarkyjs: "SnarkyJS",
+  o1js: "SnarkyJS",
 };
 
 export default {

@@ -1,4 +1,4 @@
-import { Mina, PublicKey, fetchAccount } from "snarkyjs";
+import { Mina, PublicKey, fetchAccount } from "o1js";
 import { Assert } from "./program";
 import { prove } from "./prove";
 import {

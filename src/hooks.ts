@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { PublicKey } from "snarkyjs";
+import { PublicKey } from "o1js";
 import { type StateCreator, create } from "zustand";
 import { FailedLocalAssert } from "./assertions";
 import { useLibStore } from "./store";

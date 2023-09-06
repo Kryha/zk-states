@@ -1,4 +1,4 @@
-import type { JsonProof, PublicKey } from "snarkyjs";
+import type { JsonProof, PublicKey } from "o1js";
 import { create } from "zustand";
 
 export interface LibStateVars {

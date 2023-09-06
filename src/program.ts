@@ -1,4 +1,4 @@
-import { Experimental, Field, SelfProof } from "snarkyjs";
+import { Experimental, Field, SelfProof } from "o1js";
 import type { AssertProof } from "./types";
 
 // TODO: check if we need to provide some public input
