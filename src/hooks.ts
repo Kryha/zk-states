@@ -32,7 +32,7 @@ export const createZKState = <T extends object>(
   workerClient: ZkAppWorkerClient,
   createState: StateCreator<T, [], []>,
   networkName: MinaNetwork = "berkeley",
-  appPublicKeyBase58: string, // TODO provide default
+  appPublicKeyBase58 = "B62qnz1vePxVdj82znXTxAq5xomi5QwdJ4wp1rQRV2sTBPTzdP5DDWH",
 ) => {
   const useZKStore = create<T & { rollback: (oldState: T) => void }>(
     zkImpl(

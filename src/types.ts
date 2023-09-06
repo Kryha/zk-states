@@ -1,4 +1,4 @@
-import type { JsonProof, Proof } from "snarkyjs";
+import type { JsonProof, SelfProof } from "snarkyjs";
 import { z } from "zod";
 import { type StatesVerifier } from "./contract";
 
@@ -47,7 +47,7 @@ declare global {
 export const minaNetworkSchema = z.enum(["berkeley"]);
 export type MinaNetwork = z.infer<typeof minaNetworkSchema>;
 
-export type AssertProof = Proof<void, void>;
+export type AssertProof = SelfProof<void, void>;
 
 export const assertMethodSchema = z.enum([
   "fieldEquals",
