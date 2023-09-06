@@ -40,7 +40,7 @@ export const usePlayerturn = () => {
       return;
     }
 
-    squares[i] = currentPlayer ? 2 : 1;
+    squares[i] = currentPlayer === 2 ? 2 : 1;
 
     updateBoard(i, getActivePlayer());
     setHistory([...history, { squares: squares }]);

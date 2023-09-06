@@ -44,7 +44,11 @@ export const { useInitZKStore, useZKStore, useProof, useIsInitialized } =
     currentPlayer: 1,
     finished: false,
 
-    newTurn: (turnNumber) => set(() => ({ turnNumber: turnNumber })),
+    newTurn: (turnNumber) =>
+      set(() => ({
+        turnNumber: turnNumber,
+        currentPlayer: turnNumber % 2 === 0 ? 1 : 2,
+      })),
     setHistory: (history) => set(() => ({ history: history })),
     clearHistory: () => set(() => ({ history: EMPTY_BOARD })),
     setFinished: (finished) => set(() => ({ finished: finished })),
