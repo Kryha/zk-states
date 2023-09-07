@@ -10,7 +10,7 @@ import {
 import "./styles.css";
 
 export default function TicTacToe() {
-  const { playerTurn, status, finished, replayGame } = usePlayerturn();
+  const { playerTurn, status, finished } = usePlayerturn();
   const board = useZKStore((state) => state.board);
   const isInitialized = useIsInitialized();
   const assertionQueue = useQueuedAssertions();
@@ -39,13 +39,15 @@ export default function TicTacToe() {
           assertionQueue={assertionQueue}
           status={status}
           isGameFinished={finished}
-          onClickReplay={() => {
-            replayGame();
-          }}
         />
       </div>
       <div className={"footerDiv"}>
-        <p> Made with ❤️ by Kryha</p>
+        <p>
+          Made with ❤️ by
+          <a style={{ color: "inherit" }} href="https://kryha.io">
+            Kryha
+          </a>
+        </p>
         <a href="https://github.com/kryha" target="_self">
           <img
             src="../public/github-mark.png"
