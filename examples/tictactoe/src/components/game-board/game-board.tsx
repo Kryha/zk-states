@@ -1,6 +1,6 @@
 import type { FC } from "react";
-import { Square } from "../components";
-import type { PlayField } from "../types";
+import type { PlayField } from "../../types";
+import { Square } from "../square";
 import "./styles.css";
 
 type Props = {

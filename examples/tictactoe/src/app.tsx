@@ -1,15 +1,19 @@
-import { Board, HistoryButtons } from "./components";
-import { Loading } from "./components/loading";
+import { Board } from "./components";
+import { GameInfo } from "./components/game-info";
 import { usePlayerturn } from "./hooks";
-import { useInitZKStore, useZKStore, useIsInitialized } from "./store";
+import {
+  useInitZKStore,
+  useIsInitialized,
+  useQueuedAssertions,
+  useZKStore,
+} from "./store";
 import "./styles.css";
 
 export default function TicTacToe() {
-  const { jumpTo, playerTurn, status } = usePlayerturn();
-  const history = useZKStore((state) => state.history);
+  const { playerTurn, status, finished, replayGame } = usePlayerturn();
   const board = useZKStore((state) => state.board);
   const isInitialized = useIsInitialized();
-
+  const assertionQueue = useQueuedAssertions();
   useInitZKStore();
 
   const handleClick = (i: number) => {
@@ -18,20 +22,38 @@ export default function TicTacToe() {
 
   return (
     <div className={"outerDiv"}>
-      <Board
-        enableClick={isInitialized}
-        squares={board}
-        onClick={(i) => handleClick(i)}
-      />
-      <div className="game-info">
-        {isInitialized ? (
-          <div>
-            <div>{status}</div>
-            <HistoryButtons history={history} onClick={jumpTo} />
-          </div>
-        ) : (
-          <Loading />
-        )}
+      <div className={"headerDiv"}>
+        <img src="../public/logo.png" alt="logo" width="130" height="50" />
+      </div>
+      <div className={"titleDiv"}>
+        <h1 style={{ fontSize: "4rem" }}>Verifiable Tic Tac Toe</h1>
+      </div>
+      <div className={"gameDiv"}>
+        <Board
+          enableClick={isInitialized}
+          squares={board}
+          onClick={(i) => handleClick(i)}
+        />
+        <GameInfo
+          isInitialized={isInitialized}
+          assertionQueue={assertionQueue}
+          status={status}
+          isGameFinished={finished}
+          onClickReplay={() => {
+            replayGame();
+          }}
+        />
+      </div>
+      <div className={"footerDiv"}>
+        <p> Made with ❤️ by Kryha</p>
+        <a href="https://github.com/kryha" target="_self">
+          <img
+            src="../public/github-mark.png"
+            alt="GitHub Logo"
+            height="25px"
+            width="25px"
+          />
+        </a>
       </div>
     </div>
   );

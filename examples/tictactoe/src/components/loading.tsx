@@ -1,18 +1,17 @@
 import type { FC } from "react";
 import "./styles.css";
+import { LoadingSpinner } from "./loading-spinner";
 
 export const Loading: FC = () => {
-  const style = {
-    color: "#CCFF00",
-  };
   return (
     <div>
-      <p style={style}>
+      <p>
         Currently we are compiling the ZK-Program and initializing the
         application!
       </p>
       <br />
-      <h3 style={style}>Please wait...</h3>
+      <h3>Please wait...</h3>
+      <LoadingSpinner />
     </div>
   );
 };

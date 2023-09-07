@@ -1,29 +1,51 @@
 @import "https://fonts.googleapis.com/css?family=Poppins:400,500";
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
 
 .outerDiv {
-  margin: 0%;
-  padding: 0%;
   display: flex;
-  background-color: #afa3d1;
+  background-color: #453c62;
   font-family: Poppins;
-  color: rgb(88, 30, 30);
+  color: #afa3d1;
   justify-content: center;
   align-items: center;
-  flex-direction: row;
-  gap: 10rem;
+  flex-direction: column;
+  gap: 1rem;
   height: 100vh;
 }
 
-.proof {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  max-width: 17rem;
-  overflow-wrap: break-word;
+.headerDiv {
+  position: absolute;
+  top: 20px;
+  left: 20px;
 }
 
-.game-info {
+.titleDiv {
   display: flex;
   flex-direction: column;
-  width: 17rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 5rem;
+}
+
+.gameDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 9rem;
+  gap: 10rem;
+}
+
+.footerDiv {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 40px;
+  left: 42vw;
 }

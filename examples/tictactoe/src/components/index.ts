@@ -1,3 +1,4 @@
 export * from "./game-board";
 export * from "./square";
-export * from "./history-button";
+export * from "./loading-spinner";
+export * from "./loading";
