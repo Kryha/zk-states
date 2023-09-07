@@ -8,7 +8,6 @@ type GameInfoProps = {
   assertionQueue: string[];
   isGameFinished: boolean;
   status: string;
-  onClickReplay: () => void;
 };
 
 export const GameInfo: FC<GameInfoProps> = ({
@@ -16,7 +15,6 @@ export const GameInfo: FC<GameInfoProps> = ({
   assertionQueue,
   isGameFinished,
   status,
-  onClickReplay,
 }) => {
   return (
     <div
@@ -39,14 +37,13 @@ export const GameInfo: FC<GameInfoProps> = ({
         >
           <div>
             <h3>Game Info</h3>
-
             <p>{status}</p>
           </div>
+
           <ProofQueue assertionQueue={assertionQueue} />
           <VerifyButton
             gameFinished={isGameFinished}
             assertionQueue={assertionQueue}
-            onClickReplay={onClickReplay}
           />
         </div>
       ) : (

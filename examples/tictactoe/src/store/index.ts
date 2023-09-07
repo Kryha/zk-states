@@ -18,27 +18,17 @@ const workerClient = createZKAppWorkerClient(worker);
 //TODO:: use this variable when there are string assertions avaliable
 const zkAssert = createZKAssert(workerClient);
 
-interface TicTacToeState {
+// ZK store for the TicTacToe game these values generate a proof on state change
+interface ZKState {
   board: PlayField[];
   turnNumber: number;
   currentPlayer: Player;
   finished: boolean;
-}
 
-// ZK store for the TicTacToe game these values generate a proof on state change
-interface ZKState extends TicTacToeState {
   updateBoard: (index: number) => void;
   newTurn: (turnNumber: number) => void;
   setFinished: (finished: boolean) => void;
-  resetGame: () => void;
 }
-
-const baseState: TicTacToeState = {
-  board: new Array<PlayField>(9).fill(0),
-  turnNumber: 0,
-  currentPlayer: 1,
-  finished: false,
-};
 
 export const {
   useQueuedAssertions,
@@ -47,7 +37,10 @@ export const {
   useProof,
   useIsInitialized,
 } = createZKState<ZKState>(workerClient, (set) => ({
-  ...baseState,
+  board: new Array<PlayField>(9).fill(0),
+  turnNumber: 0,
+  currentPlayer: 1,
+  finished: false,
 
   newTurn: (turnNumber) =>
     set(() => ({
@@ -63,8 +56,5 @@ export const {
         state.currentPlayer = state.currentPlayer === 2 ? 1 : 2;
       }),
     );
-  },
-  resetGame: () => {
-    set(() => ({ ...baseState }));
   },
 }));

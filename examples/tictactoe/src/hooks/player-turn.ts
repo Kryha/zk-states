@@ -1,5 +1,4 @@
 import { useZKStore } from "../store";
-import type { PlayField } from "../types";
 import { calculateWinner } from "../util";
 
 export const usePlayerturn = () => {
@@ -9,7 +8,6 @@ export const usePlayerturn = () => {
   const setFinished = useZKStore((state) => state.setFinished);
   const newTurn = useZKStore((state) => state.newTurn);
   const updateBoard = useZKStore((state) => state.updateBoard);
-  const resetGame = useZKStore((state) => state.resetGame);
 
   const board = useZKStore((state) => state.board);
 
@@ -40,9 +38,5 @@ export const usePlayerturn = () => {
     newTurn(turnNumber + 1);
   };
 
-  const replayGame = () => {
-    resetGame();
-  };
-
-  return { finished, playerTurn, replayGame, status };
+  return { finished, playerTurn, status };
 };
