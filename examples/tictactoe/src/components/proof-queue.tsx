@@ -1,5 +1,4 @@
 import { type FC } from "react";
-import { LoadingSpinner } from "./loading-spinner";
 
 type ProofQueueProps = {
   assertionQueue: string[];
@@ -14,20 +13,20 @@ export const ProofQueue: FC<ProofQueueProps> = ({ assertionQueue }) => {
         style={{
           display: "flex",
           flexDirection: "row",
-          justifyContent: "center",
           alignItems: "center",
+          justifyContent: "center",
           gap: "1rem",
         }}
       >
         {assertionQueue.length === 1 && (
           <>
-            <LoadingSpinner isSmall />
+            <img src="../public/loading.svg" height="20px" width="20px" />
             <p> {assertionQueue.length} proof still needs to be generated</p>
           </>
         )}
         {assertionQueue.length > 1 && (
           <>
-            <LoadingSpinner isSmall />
+            <img src="../public/loading.svg" height="20px" width="20px" />
             <p> {assertionQueue.length} proofs still needs to be generated</p>
           </>
         )}

@@ -1,6 +1,5 @@
 import type { FC } from "react";
 import "./styles.css";
-import { LoadingSpinner } from "./loading-spinner";
 
 export const Loading: FC = () => {
   return (
@@ -11,7 +10,12 @@ export const Loading: FC = () => {
       </p>
       <br />
       <h3>Please wait...</h3>
-      <LoadingSpinner />
+      <img
+        style={{ marginTop: "1rem" }}
+        src="../public/loading.svg"
+        height="80px"
+        width="80px"
+      />
     </div>
   );
 };
