@@ -43,19 +43,19 @@ export default function TicTacToe() {
       </div>
       <div className={"footerDiv"}>
         <p>
-          Made with ❤️ by
+          Made with ❤️ by{" "}
           <a style={{ color: "inherit" }} href="https://kryha.io">
             Kryha
+          </a>{" "}
+          <a href="https://github.com/kryha" target="_self">
+            <img
+              src="../public/github-mark.png"
+              alt="GitHub Logo"
+              height="25px"
+              width="25px"
+            />
           </a>
         </p>
-        <a href="https://github.com/kryha" target="_self">
-          <img
-            src="../public/github-mark.png"
-            alt="GitHub Logo"
-            height="25px"
-            width="25px"
-          />
-        </a>
       </div>
     </div>
   );
