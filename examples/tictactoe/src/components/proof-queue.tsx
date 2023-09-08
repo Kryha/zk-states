@@ -5,10 +5,12 @@ type ProofQueueProps = {
 };
 
 export const ProofQueue: FC<ProofQueueProps> = ({ assertionQueue }) => {
+  const queueLength = assertionQueue.length;
+
   return (
     <div>
       <h3>Proof Queue</h3>
-      {assertionQueue.length === 0 && <p>No proofs are being generated</p>}
+      {queueLength === 0 && <p>No proofs are being generated</p>}
       <div
         style={{
           display: "flex",
@@ -18,16 +20,13 @@ export const ProofQueue: FC<ProofQueueProps> = ({ assertionQueue }) => {
           gap: "1rem",
         }}
       >
-        {assertionQueue.length === 1 && (
+        {queueLength > 0 && (
           <>
             <img src="../public/loading.svg" height="20px" width="20px" />
-            <p> {assertionQueue.length} proof still needs to be generated</p>
-          </>
-        )}
-        {assertionQueue.length > 1 && (
-          <>
-            <img src="../public/loading.svg" height="20px" width="20px" />
-            <p> {assertionQueue.length} proofs still needs to be generated</p>
+            <p>
+              {queueLength} proof{queueLength === 1 ? "" : "s"} still need
+              {queueLength === 1 ? "s" : ""} to be generated
+            </p>
           </>
         )}
       </div>
