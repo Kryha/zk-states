@@ -6,8 +6,7 @@ export const usePlayerturn = () => {
   const finished = useZKStore((state) => state.finished);
   const currentPlayer = useZKStore((state) => state.currentPlayer);
   const setFinished = useZKStore((state) => state.setFinished);
-  const newTurn = useZKStore((state) => state.newTurn);
-  const updateBoard = useZKStore((state) => state.updateBoard);
+  const updateBoard = useZKStore((state) => state.markCell);
 
   const board = useZKStore((state) => state.board);
 
@@ -35,7 +34,6 @@ export const usePlayerturn = () => {
       return;
     }
     updateBoard(i);
-    newTurn(turnNumber + 1);
   };
 
   return { finished, playerTurn, status };

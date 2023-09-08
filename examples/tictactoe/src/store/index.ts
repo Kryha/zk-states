@@ -15,18 +15,16 @@ const worker = new Worker(
 
 const workerClient = createZKAppWorkerClient(worker);
 
-//TODO:: use this variable when there are string assertions avaliable
+// use this to assert conditions in your state to create proofs
 const zkAssert = createZKAssert(workerClient);
 
-// ZK store for the TicTacToe game these values generate a proof on state change
 interface ZKState {
   board: PlayField[];
   turnNumber: number;
   currentPlayer: Player;
   finished: boolean;
 
-  updateBoard: (index: number) => void;
-  newTurn: (turnNumber: number) => void;
+  markCell: (index: number) => void;
   setFinished: (finished: boolean) => void;
 }
 
@@ -42,18 +40,16 @@ export const {
   currentPlayer: 1,
   finished: false,
 
-  newTurn: (turnNumber) =>
-    set(() => ({
-      turnNumber: turnNumber,
-      currentPlayer: turnNumber % 2 === 0 ? 1 : 2,
-    })),
   setFinished: (finished) => set(() => ({ finished: finished })),
-  updateBoard: (index) => {
+  markCell: (index) => {
     set(
       produce((state: ZKState) => {
+        // By asserting that the cell is empty, we can prove that the Player
+        // is not cheating by marking a cell that is already marked.
         zkAssert.numeric.equals(state.board[index], 0);
         state.board[index] = state.currentPlayer;
         state.currentPlayer = state.currentPlayer === 2 ? 1 : 2;
+        state.turnNumber++;
       }),
     );
   },
