@@ -1,6 +1,6 @@
 import { type PlayField, type Player } from "../types";
 
-export const calculateWinner = (squares: Array<PlayField>): Player | null => {
+export const calculateWinner = (squares: PlayField[]): Player | undefined => {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
