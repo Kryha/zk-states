@@ -41,6 +41,11 @@ export class ZkAppWorkerClient {
     this.nextId = 0;
     this.stateHistory = {};
     this.latestAssertions = [];
+
+    this.worker.onmessage = (event: MessageEvent<ZkappWorkerReponse>) => {
+      this.promises[event.data.id].resolve(event.data.data);
+      delete this.promises[event.data.id];
+    };
   }
 
   private call(fn: WorkerFunctions, args: unknown) {

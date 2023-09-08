@@ -1,6 +1,6 @@
-import type { JsonProof, SelfProof } from "o1js";
+import type { JsonProof } from "o1js";
 import { z } from "zod";
-import { type StatesVerifier } from "./contract";
+import type { AssertProgramProof, StatesVerifier } from "./contract";
 
 interface SignMessageArgs {
   message: string;
@@ -47,8 +47,6 @@ declare global {
 export const minaNetworkSchema = z.enum(["berkeley"]);
 export type MinaNetwork = z.infer<typeof minaNetworkSchema>;
 
-export type AssertProof = SelfProof<void, void>;
-
 export const assertMethodSchema = z.enum([
   "fieldEquals",
   "fieldNotEquals",
@@ -60,8 +58,8 @@ export const assertMethodSchema = z.enum([
 export type AssertMethod = z.infer<typeof assertMethodSchema>;
 
 export type TransitionFunction = (
-  prevProof: AssertProof,
-) => Promise<AssertProof>;
+  prevProof: AssertProgramProof,
+) => Promise<AssertProgramProof>;
 
 export interface QueuedAssertion {
   callId: string;
@@ -72,7 +70,7 @@ export interface QueuedAssertion {
 }
 
 export interface WorkerState {
-  latestProof?: AssertProof;
+  latestProof?: AssertProgramProof;
   updateQueue: QueuedAssertion[];
   isProving: boolean;
   statesVerifier?: StatesVerifier;

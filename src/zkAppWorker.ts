@@ -1,9 +1,8 @@
 import { Mina, PublicKey, fetchAccount } from "o1js";
-import { Assert } from "./program";
+import { Assert, type AssertProgramProof } from "./contract";
 import { prove } from "./prove";
 import {
   type AssertMethod,
-  type AssertProof,
   type MinaNetwork,
   type QueuedAssertion,
   type TransitionRes,
@@ -99,7 +98,7 @@ setInterval(async () => {
 }, 3000);
 
 const generateAssertion = (methodName: AssertMethod, methodArgs: string[]) => {
-  const method = async (prevProof: AssertProof) => {
+  const method = async (prevProof: AssertProgramProof) => {
     logger.info("[zk-states worker] creating update proof...");
     const proof = await prove(prevProof, methodName, methodArgs);
     logger.info("[zk-states worker] update proof generated");
@@ -125,19 +124,18 @@ const workerFunctions = {
   init: async (args: unknown): Promise<TransitionRes> => {
     const { appPublicKey58 } = initArgsSchema.parse(args);
 
-    const { StatesVerifier } = await import("./contract");
+    logger.info("[zk-states worker] compiling program...");
+    await Assert.compile();
+    logger.info("[zk-states worker] program compiled");
 
     logger.info("[zk-states worker] compiling contract...");
+    const { StatesVerifier } = await import("./contract");
     await StatesVerifier.compile();
     logger.info("[zk-states worker] contract compiled");
 
     state.statesVerifier = new StatesVerifier(
       PublicKey.fromBase58(appPublicKey58),
     );
-
-    logger.info("[zk-states worker] compiling program...");
-    await Assert.compile();
-    logger.info("[zk-states worker] program compiled");
 
     logger.info("[zk-states worker] creating init proof...");
     const creationProof = await Assert.init();
@@ -171,16 +169,21 @@ const workerFunctions = {
       throw new Error("Update queue must be empty");
     }
 
+    logger.info("[zk-states worker] generating mina transaction...");
     const transaction = await Mina.transaction(() => {
       if (!state.statesVerifier || !state.latestProof) return;
       state.statesVerifier.verifyProof(state.latestProof);
     });
 
+    logger.info("[zk-states worker] proving mina transaction...");
     // TODO: do we need to store this generated proof?
     await transaction.prove();
 
+    logger.info("[zk-states worker] re-initializing program...");
     // TODO: maybe store the transaction proof instead of resetting
     state.latestProof = await Assert.init();
+
+    logger.info("[zk-states worker] verify completed");
 
     return { transaction: transaction.toJSON() };
   },

@@ -15,7 +15,6 @@
     "baseUrl": "src",
     "outDir": "dist",
     "declaration": true,
-    "experimentalDecorators": true,
     "paths": {
       "zk-states": ["./index.ts"],
       "zk-states/*": ["./*.ts"]

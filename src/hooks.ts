@@ -32,7 +32,7 @@ export const createZKState = <T extends object>(
   workerClient: ZkAppWorkerClient,
   createState: StateCreator<T, [], []>,
   networkName: MinaNetwork = "berkeley",
-  appPublicKeyBase58 = "B62qnz1vePxVdj82znXTxAq5xomi5QwdJ4wp1rQRV2sTBPTzdP5DDWH",
+  appPublicKeyBase58 = "B62qrquKapqyBXxtEBGQTUKLzHeD7xJnxG1qro83HjXhFj7rBiLTuXD",
 ) => {
   const useZKStore = create<T & { rollback: (oldState: T) => void }>(
     zkImpl(
@@ -92,10 +92,12 @@ export const createZKState = <T extends object>(
             switch (workerRes.updateType) {
               case "latestProof": {
                 setProof(workerRes.data);
+                console.log("🚀 ~ init ~ workerRes.data:", workerRes.data);
                 break;
               }
               case "updateQueue": {
                 setQueuedAssertions(workerRes.data);
+                console.log("🚀 ~ init ~ workerRes.data:", workerRes.data);
                 break;
               }
               case "isProving": {
@@ -135,6 +137,7 @@ export const createZKState = <T extends object>(
     ]);
   };
 
+  // Couldn't send zkApp command: (Verification_failed ("No verification key found for proved account update" (account_id (B62qkx4PKtUdtn1JrrDw3JKGCAfL1HmXZ484An65n4AqFj1J2UEDNNi 0x0000000000000000000000000000000000000000000000000000000000000001))))
   const useVerify = () => {
     const [verificationStatus, setVerificationStatus] =
       useState<VerificationStatus>("none");
@@ -173,6 +176,7 @@ export const createZKState = <T extends object>(
     useLibStore((state) => state.queuedAssertions);
   const useIsProving = () => useLibStore((state) => state.isProving);
   const useProofFailed = () => useLibStore((state) => state.proofFailed);
+  const useHasWallet = () => useLibStore((state) => state.hasWallet);
 
   return {
     useZKStore,
@@ -183,5 +187,6 @@ export const createZKState = <T extends object>(
     useIsProving,
     useProofFailed,
     useVerify,
+    useHasWallet,
   };
 };
