@@ -7,20 +7,15 @@ const extensions = [".js", ".jsx", ".ts", ".tsx"];
 const globals = {
   react: "React",
   "react-dom": "ReactDOM",
-  snarkyjs: "SnarkyJS",
+  o1js: "SnarkyJS",
 };
 
 export default {
   input: ["./src/index.ts"],
   output: [
     {
-      file: "./dist/index.esm.js",
+      dir: "./dist",
       format: "esm",
-      globals,
-    },
-    {
-      file: "./dist/index.cjs.js",
-      format: "cjs",
       globals,
     },
   ],
@@ -30,4 +25,8 @@ export default {
     commonjs(),
     typescript(),
   ],
+  onwarn: (warning, handler) => {
+    if (warning.code === "THIS_IS_UNDEFINED") return;
+    handler(warning);
+  },
 };

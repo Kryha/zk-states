@@ -1,8 +1,13 @@
+import type { fetchAccount } from "o1js";
 import { v4 as uuid } from "uuid";
 import type {
   AssertMethodsPayload,
   CallAssertionArgs,
+  FetchAccountArgs,
+  InitArgs,
+  SetMinaNetworkArgs,
   TransitionRes,
+  TxRes,
   WorkerStateUpdate,
 } from "./types";
 import {
@@ -36,6 +41,11 @@ export class ZkAppWorkerClient {
     this.nextId = 0;
     this.stateHistory = {};
     this.latestAssertions = [];
+
+    this.worker.onmessage = (event: MessageEvent<ZkappWorkerReponse>) => {
+      this.promises[event.data.id].resolve(event.data.data);
+      delete this.promises[event.data.id];
+    };
   }
 
   private call(fn: WorkerFunctions, args: unknown) {
@@ -54,7 +64,19 @@ export class ZkAppWorkerClient {
     });
   }
 
-  async init(onWorkerStateUpdate?: (workerRes: WorkerStateUpdate) => void) {
+  async setMinaNetwork(args: SetMinaNetworkArgs) {
+    await this.call("setMinaNetwork", args);
+  }
+
+  async fetchAccount(args: FetchAccountArgs) {
+    const res = await this.call("fetchAccount", args);
+    return res as ReturnType<typeof fetchAccount>;
+  }
+
+  async init(
+    args: InitArgs,
+    onWorkerStateUpdate?: (workerRes: WorkerStateUpdate) => void,
+  ) {
     this.worker.onmessage = (
       event: MessageEvent<ZkappWorkerReponse | WorkerStateUpdate>,
     ) => {
@@ -66,7 +88,12 @@ export class ZkAppWorkerClient {
       }
     };
 
-    const result = (await this.call("init", {})) as TransitionRes;
+    const result = (await this.call("init", args)) as TransitionRes;
+    return result;
+  }
+
+  async verify() {
+    const result = (await this.call("verify", {})) as TxRes;
     return result;
   }
 

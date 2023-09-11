@@ -3783,6 +3783,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"o1js@npm:^0.12.1":
+  version: 0.12.1
+  resolution: "o1js@npm:0.12.1"
+  dependencies:
+    blakejs: 1.2.1
+    detect-gpu: ^5.0.5
+    isomorphic-fetch: ^3.0.0
+    js-sha256: ^0.9.0
+    reflect-metadata: ^0.1.13
+    tslib: ^2.3.0
+  bin:
+    snarky-run: src/build/run.js
+  checksum: 50b21fa4a69490ca2018f850a17336a71cf4c6e2bd1607acf3f24394ca86e22065c68c6bf323ecd3fb7adabcc8c258b7be78db5b6ccf1ba60ea7b104a3a90098
+  languageName: node
+  linkType: hard
+
 "object-assign@npm:^4.1.1":
   version: 4.1.1
   resolution: "object-assign@npm:4.1.1"
@@ -4524,22 +4540,6 @@ __metadata:
   version: 4.2.0
   resolution: "smart-buffer@npm:4.2.0"
   checksum: b5167a7142c1da704c0e3af85c402002b597081dd9575031a90b4f229ca5678e9a36e8a374f1814c8156a725d17008ae3bde63b92f9cfd132526379e580bec8b
-  languageName: node
-  linkType: hard
-
-"snarkyjs@npm:^0.12.1":
-  version: 0.12.1
-  resolution: "snarkyjs@npm:0.12.1"
-  dependencies:
-    blakejs: 1.2.1
-    detect-gpu: ^5.0.5
-    isomorphic-fetch: ^3.0.0
-    js-sha256: ^0.9.0
-    reflect-metadata: ^0.1.13
-    tslib: ^2.3.0
-  bin:
-    snarky-run: src/build/run.js
-  checksum: a96d866e7a6651b8e5811d5dcac989566a0a9d8357452c249ecbd0f6c7aa3a45f93210d54a451decc4f7c88282ef3463d180bea6d03493d7e632289bb9fa524c
   languageName: node
   linkType: hard
 
@@ -5474,12 +5474,12 @@ __metadata:
     eslint-plugin-react-hooks: ^4.6.0
     eslint-plugin-vitest: ^0.2.8
     jsdom: ^22.1.0
+    o1js: ^0.12.1
     prettier: ^3.0.0
     react: ^18.2.0
     react-dom: ^18.2.0
     rollup: ^3.28.0
     rollup-plugin-peer-deps-external: ^2.2.4
-    snarkyjs: ^0.12.1
     typescript: ^5.1.6
     uuid: ^9.0.0
     vite: ^4.4.9
@@ -5491,9 +5491,9 @@ __metadata:
     zod: ^3.21.4
     zustand: ^4.3.9
   peerDependencies:
+    o1js: ">=0.11.0"
     react: ">=18.0.0"
     react-dom: ">=18.0.0"
-    snarkyjs: ">=0.11.0"
     zustand: ">=4.3.9"
   languageName: unknown
   linkType: soft

@@ -1,6 +1,6 @@
-import { Field } from "snarkyjs";
-import { Assert } from "./program";
-import type { AssertMethod, AssertProof } from "./types";
+import { Field } from "o1js";
+import { Assert, type AssertProgramProof } from "./contract";
+import type { AssertMethod } from "./types";
 
 const argsError = (methodName: AssertMethod) =>
   new Error(`Invalid args provided for ${methodName}`);
@@ -15,7 +15,7 @@ const argsToField = (
 };
 
 export const prove = (
-  previousProof: AssertProof,
+  previousProof: AssertProgramProof,
   methodName: AssertMethod,
   args: string[],
 ) => {

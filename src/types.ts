@@ -1,7 +1,51 @@
-import type { JsonProof, Proof } from "snarkyjs";
+import type { JsonProof } from "o1js";
 import { z } from "zod";
+import type { AssertProgramProof, StatesVerifier } from "./contract";
 
-export type AssertProof = Proof<void, void>;
+interface SignMessageArgs {
+  message: string;
+}
+
+interface SignedData {
+  publicKey: string;
+  data: string;
+  signature: {
+    field: string;
+    scalar: string;
+  };
+}
+
+type SignFieldsArguments = {
+  message: (string | number)[];
+};
+
+type SignedFieldsData = {
+  data: (string | number)[];
+  signature: string;
+};
+
+interface MinaWallet {
+  requestAccounts: () => Promise<string[]>;
+  sendTransaction: (options: {
+    transaction: string;
+    feePayer?: {
+      fee?: number;
+      memo?: string;
+    };
+  }) => Promise<{ hash: string }>;
+  signMessage: (args: SignMessageArgs) => Promise<SignedData>;
+  signFields: (args: SignFieldsArguments) => Promise<SignedFieldsData>;
+}
+
+declare global {
+  interface Window {
+    mina?: MinaWallet;
+  }
+}
+
+// TODO: add devnet and mainnet
+export const minaNetworkSchema = z.enum(["berkeley"]);
+export type MinaNetwork = z.infer<typeof minaNetworkSchema>;
 
 export const assertMethodSchema = z.enum([
   "fieldEquals",
@@ -14,8 +58,8 @@ export const assertMethodSchema = z.enum([
 export type AssertMethod = z.infer<typeof assertMethodSchema>;
 
 export type TransitionFunction = (
-  prevProof: AssertProof,
-) => Promise<AssertProof>;
+  prevProof: AssertProgramProof,
+) => Promise<AssertProgramProof>;
 
 export interface QueuedAssertion {
   callId: string;
@@ -26,10 +70,24 @@ export interface QueuedAssertion {
 }
 
 export interface WorkerState {
-  latestProof?: AssertProof;
+  latestProof?: AssertProgramProof;
   updateQueue: QueuedAssertion[];
   isProving: boolean;
+  statesVerifier?: StatesVerifier;
 }
+
+export const setMinaNetworkArgsSchema = z.object({
+  networkName: minaNetworkSchema,
+});
+export type SetMinaNetworkArgs = z.infer<typeof setMinaNetworkArgsSchema>;
+
+export const fetchAccountArgsSchema = z.object({ publicKey58: z.string() });
+export type FetchAccountArgs = z.infer<typeof fetchAccountArgsSchema>;
+
+export const initArgsSchema = z.object({
+  appPublicKey58: z.string(),
+});
+export type InitArgs = z.infer<typeof initArgsSchema>;
 
 export const assertMethodsPayloadSchema = z.array(
   z.object({ name: assertMethodSchema, args: z.array(z.string()) }),
@@ -77,3 +135,7 @@ export type WorkerStateUpdate =
   | IsProvingUpdate
   | ProofErrorUpdate
   | ProofSuccessUpdate;
+
+export interface TxRes {
+  transaction: string;
+}
