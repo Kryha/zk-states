@@ -1114,6 +1114,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@zk-states/monorepo@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@zk-states/monorepo@workspace:."
+  languageName: unknown
+  linkType: soft
+
 "abab@npm:^2.0.6":
   version: 2.0.6
   resolution: "abab@npm:2.0.6"
@@ -5449,9 +5455,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zk-states@workspace:.":
+"zk-states@workspace:zk-states":
   version: 0.0.0-use.local
-  resolution: "zk-states@workspace:."
+  resolution: "zk-states@workspace:zk-states"
   dependencies:
     "@rollup/plugin-commonjs": ^25.0.3
     "@rollup/plugin-node-resolve": ^15.1.0
