@@ -1,4 +1,4 @@
-import { Experimental, Field, SelfProof, SmartContract, method } from 'o1js';
+import { Experimental, Field, SelfProof, SmartContract, method } from "o1js";
 
 export type AssertProof = SelfProof<void, void>;
 

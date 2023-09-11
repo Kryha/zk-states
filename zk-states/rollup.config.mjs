@@ -14,8 +14,13 @@ export default {
   input: ["./src/index.ts"],
   output: [
     {
-      dir: "./dist",
+      file: "./dist/index.esm.js",
       format: "esm",
+      globals,
+    },
+    {
+      file: "./dist/index.cjs.js",
+      format: "cjs",
       globals,
     },
   ],

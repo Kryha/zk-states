@@ -1,12 +1,12 @@
-import { AccountUpdate, Mina, PrivateKey, fetchAccount } from 'o1js';
-import { z } from 'zod';
-import { Assert, StatesVerifier } from './StatesVerifier.js';
+import { AccountUpdate, Mina, PrivateKey, fetchAccount } from "o1js";
+import { z } from "zod";
+import { Assert, StatesVerifier } from "./StatesVerifier.js";
 
 const envSchema = z.object({
   MINA_URL: z
     .string()
     .url()
-    .default('https://proxy.berkeley.minaexplorer.com/graphql'),
+    .default("https://proxy.berkeley.minaexplorer.com/graphql"),
   DEPLOYER_PRIVATE_KEY: z.string(),
   APP_PRIVATE_KEY: z.string().optional(),
 });
@@ -22,7 +22,7 @@ const deploy = async () => {
   const deployerKey = PrivateKey.fromBase58(env.DEPLOYER_PRIVATE_KEY);
   const deployerAddress = deployerKey.toPublicKey();
 
-  console.log('Fetching deployer account...');
+  console.log("Fetching deployer account...");
   let fetchAccountRes = await fetchAccount({ publicKey: deployerAddress });
 
   if (fetchAccountRes.error) throw Error(fetchAccountRes.error.statusText);
@@ -38,15 +38,15 @@ const deploy = async () => {
     : PrivateKey.random();
   const zkAppAddress = zkAppKey.toPublicKey();
 
-  console.log('Compiling program...');
+  console.log("Compiling program...");
   await Assert.compile();
 
-  console.log('Compiling contract...');
+  console.log("Compiling contract...");
   const { verificationKey } = await StatesVerifier.compile();
 
   const verifierApp = new StatesVerifier(zkAppAddress);
 
-  console.log('Generating deployment transaction...');
+  console.log("Generating deployment transaction...");
   const deployTx = await Mina.transaction(
     { fee: DEPLOYMENT_FEE, sender: deployerAddress },
     () => {
@@ -55,20 +55,20 @@ const deploy = async () => {
     }
   );
 
-  console.log('Proving deployment transaction...');
+  console.log("Proving deployment transaction...");
   await deployTx.prove();
   deployTx.sign([deployerKey, zkAppKey]);
 
-  console.log('Sending deployment transaction...');
+  console.log("Sending deployment transaction...");
   const sendRes = await deployTx.send();
-  if (!sendRes.isSuccess) throw new Error('Deployment transaction failed');
+  if (!sendRes.isSuccess) throw new Error("Deployment transaction failed");
 
-  console.log('Waiting for transaction to complete...');
+  console.log("Waiting for transaction to complete...");
   await sendRes.wait();
 
-  console.log('Contract deployed at address:', zkAppAddress.toBase58());
-  console.log('Contract private key is:', zkAppKey.toBase58());
-  console.log('Check the transaction progress in your wallet');
+  console.log("Contract deployed at address:", zkAppAddress.toBase58());
+  console.log("Contract private key is:", zkAppKey.toBase58());
+  console.log("Check the transaction progress in your wallet");
 };
 
 deploy();

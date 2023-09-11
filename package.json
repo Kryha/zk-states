@@ -18,6 +18,7 @@
   "author": "Marius Sili (https://github.com/silimarius)",
   "workspaces": [
     "zk-states",
-    "zk-states-contracts"
+    "zk-states-contracts",
+    "zk-states-playground"
   ]
 }
