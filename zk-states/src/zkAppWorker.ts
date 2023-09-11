@@ -1,5 +1,5 @@
 import { Mina, PublicKey, fetchAccount } from "o1js";
-import { Assert, type AssertProgramProof } from "./contract";
+import { Assert, type AssertProgramProof } from "zk-states-contracts";
 import { prove } from "./prove";
 import {
   type AssertMethod,
@@ -129,7 +129,7 @@ const workerFunctions = {
     logger.info("[zk-states worker] program compiled");
 
     logger.info("[zk-states worker] compiling contract...");
-    const { StatesVerifier } = await import("./contract");
+    const { StatesVerifier } = await import("zk-states-contracts");
     await StatesVerifier.compile();
     logger.info("[zk-states worker] contract compiled");
 
