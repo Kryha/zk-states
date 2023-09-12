@@ -1,5 +1,5 @@
 /**
- * This script can be used to interact with the Add contract, after deploying it.
+ * This script can be used to interact with the StatesVerifier contract, after deploying it.
  *
  * We call the update() method on the contract, create a proof and send it to the chain.
  * The endpoint that we interact with is read from your config.json.

@@ -1,6 +1,6 @@
 # zk-states
 
-Verifiable state manager for React based on SnarkyJS & Mina protocol.
+Verifiable state manager for React based on o1js & Mina protocol.
 
 ## Installation
 
@@ -65,7 +65,7 @@ const { useInitZKStore, useZKStore, useProof, useIsInitialized } =
 
 ## Configuring your project
 
-ZkStates leverages SnarkyJS to enable proof generation in the browser. to enable SnarkyJS for the web, we must set the COOP and COEP headers. When using a Vite project we also need to install a plugin to enable topLevelAwait for the web worker.
+ZkStates leverages o1js to enable proof generation in the browser. to enable o1js for the web, we must set the COOP and COEP headers. When using a Vite project we also need to install a plugin to enable topLevelAwait for the web worker.
 
 ### Next.js
 

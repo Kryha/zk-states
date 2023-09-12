@@ -6,7 +6,8 @@
   "scripts": {
     "clean": "yarn workspaces foreach run clean",
     "build:lib": "yarn clean && yarn workspaces foreach -t --from '{zk-states-contracts,zk-states}' run build",
-    "build": "yarn clean && yarn workspaces foreach -t run build"
+    "build": "yarn clean && yarn workspaces foreach -t run build",
+    "deploy:zkapp": "cd zk-states-contracts && yarn deploy:zkapp"
   },
   "engines": {
     "node": ">=12.7.0"

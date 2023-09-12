@@ -21,7 +21,8 @@
     "prepare": "husky install",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "testw": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "lint": "yarn eslint src/* --fix"
+    "lint": "yarn eslint src/* --fix",
+    "deploy:zkapp": "tsc && node build/src/deploy.js"
   },
   "lint-staged": {
     "**/*": [
