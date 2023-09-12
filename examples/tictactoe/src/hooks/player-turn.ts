@@ -12,11 +12,20 @@ export const usePlayerturn = () => {
 
   const winner = calculateWinner(board);
 
-  const status = winner
-    ? "Winner: " + (winner === 2 ? "X" : "O")
-    : "Next player: " + (currentPlayer === 2 ? "X" : "O");
+  const getPlayerIcon = (player: number) => {
+    if (player === 2) {
+      return "X";
+    } else if (player === 1) {
+      return "O";
+    }
+    return;
+  };
 
-  const playerTurn = (i: number) => {
+  const status = winner
+    ? "Winner: " + getPlayerIcon(winner)
+    : "Next player: " + getPlayerIcon(currentPlayer);
+
+  const makeMove = (i: number) => {
     if (finished) {
       return;
     }
@@ -36,5 +45,5 @@ export const usePlayerturn = () => {
     updateBoard(i);
   };
 
-  return { finished, playerTurn, status };
+  return { finished, makeMove, status };
 };
