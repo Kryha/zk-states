@@ -94,11 +94,6 @@
   },
   "ignorePatterns": ["**/*.umd.js", "**/generated/*"],
   "settings": {
-    "import/resolver": {
-      "node": {
-        "extensions": [".js", ".jsx", ".ts", ".tsx"]
-      }
-    },
     "react": {
       "version": "detect"
     }
