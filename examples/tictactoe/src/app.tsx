@@ -10,25 +10,25 @@ import {
 import "./styles.css";
 
 export default function TicTacToe() {
-  const { playerTurn, status, finished } = usePlayerturn();
+  const { makeMove, status, finished } = usePlayerturn();
   const board = useZKStore((state) => state.board);
   const isInitialized = useIsInitialized();
   const assertionQueue = useQueuedAssertions();
   useInitZKStore();
 
   const handleClick = (i: number) => {
-    playerTurn(i);
+    makeMove(i);
   };
 
   return (
-    <div className={"outerDiv"}>
-      <div className={"headerDiv"}>
+    <div className="outerDiv">
+      <div className="headerDiv">
         <img src="../public/logo.png" alt="logo" width="130" height="50" />
       </div>
-      <div className={"titleDiv"}>
+      <div className="titleDiv">
         <h1 style={{ fontSize: "4rem" }}>Verifiable Tic Tac Toe</h1>
       </div>
-      <div className={"gameDiv"}>
+      <div className="gameDiv">
         <Board
           enableClick={isInitialized}
           squares={board}
@@ -41,7 +41,7 @@ export default function TicTacToe() {
           isGameFinished={finished}
         />
       </div>
-      <div className={"footerDiv"}>
+      <div className="footerDiv">
         <p>
           Made with ❤️ by{" "}
           <a style={{ color: "inherit" }} href="https://kryha.io">
