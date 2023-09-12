@@ -134,4 +134,22 @@ export default defineConfig({
 });
 ```
 
+## Deploying the StateVerifier contract
+
+By default, the library connects to an already deployed contract on the berkeley testnet. If you want to deploy your own, run the following command from the root directory:
+
+```sh
+DEPLOYER_PRIVATE_KEY=<your_wallet_private_key> MINA_URL=<graphql_mina_url> yarn deploy:zkapp
+```
+
+`MINA_URL` env variable is optional and defaults to `https://proxy.berkeley.minaexplorer.com/graphql`
+
+The deployment will take some time. If successfull, it will print out the private and public keys of the newly deployed zkApp. Keep the private key secret!
+
+You can use the public key in the library, to connect to your own deployed contract:
+
+```ts
+const { useZKState } = createZKState(workerClient, () => {...}, "berkeley", "<your_zkapp_address>");
+```
+
 <!-- TODO: properly document functions -->
