@@ -21,11 +21,11 @@ export default function TicTacToe() {
   };
 
   return (
-    <div className="outerDiv">
-      <div className="headerDiv">
+    <div className="outer">
+      <div className="header">
         <img src="../public/logo.png" alt="logo" width="130" height="50" />
       </div>
-      <div className="titleDiv">
+      <div className="title">
         <h1 style={{ fontSize: "4rem" }}>Verifiable Tic Tac Toe</h1>
       </div>
       <div className="gameDiv">
@@ -41,7 +41,7 @@ export default function TicTacToe() {
           isGameFinished={finished}
         />
       </div>
-      <div className="footerDiv">
+      <div className="footer">
         <p>
           Made with ❤️ by{" "}
           <a style={{ color: "inherit" }} href="https://kryha.io">

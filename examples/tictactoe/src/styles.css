@@ -5,7 +5,7 @@
   margin: 0;
 }
 
-.outerDiv {
+.outer {
   display: flex;
   background-color: #453c62;
   font-family: Poppins;
@@ -17,13 +17,13 @@
   height: 100vh;
 }
 
-.headerDiv {
+.header {
   position: absolute;
   top: 20px;
   left: 20px;
 }
 
-.titleDiv {
+.title {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -31,7 +31,7 @@
   margin-bottom: 5rem;
 }
 
-.gameDiv {
+.game {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -40,7 +40,7 @@
   gap: 10rem;
 }
 
-.footerDiv {
+.footer {
   display: flex;
   flex-direction: column;
   justify-content: center;
