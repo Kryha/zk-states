@@ -28,7 +28,7 @@ export default function TicTacToe() {
       <div className="title">
         <h1 style={{ fontSize: "4rem" }}>Verifiable Tic Tac Toe</h1>
       </div>
-      <div className="gameDiv">
+      <div className="game">
         <Board
           enableClick={isInitialized}
           squares={board}
@@ -44,17 +44,14 @@ export default function TicTacToe() {
       <div className="footer">
         <p>
           Made with ❤️ by{" "}
-          <a style={{ color: "inherit" }} href="https://kryha.io">
-            Kryha
-          </a>{" "}
-          <a href="https://github.com/kryha" target="_self">
-            <img
-              src="../public/github-mark.png"
-              alt="GitHub Logo"
-              height="25px"
-              width="25px"
-            />
-          </a>
+          <strong>
+            <a
+              style={{ color: "inherit", textDecoration: "none" }}
+              href="https://kryha.io"
+            >
+              Kryha
+            </a>
+          </strong>
         </p>
       </div>
     </div>
