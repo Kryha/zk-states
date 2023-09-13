@@ -1,20 +1,21 @@
 import type { FC } from "react";
-import { Square } from "../components";
-import type { Player } from "../types";
+import type { PlayField } from "../../types";
+import { Square } from "../square";
 import "./styles.css";
 
 type Props = {
-  squares: Array<Player>;
+  squares: Array<PlayField>;
   onClick: (i: number) => void;
+  enableClick?: boolean;
 };
 
-export const Board: FC<Props> = ({ squares, onClick }) => {
+export const Board: FC<Props> = ({ squares, onClick, enableClick }) => {
   const renderSquare = (i: number) => (
     <Square value={squares[i]} onClick={() => onClick(i)} />
   );
 
   return (
-    <div className="gameboard">
+    <div className={enableClick ? "gameboard" : "gameboard-disabled"}>
       <div className="boardRow">
         {renderSquare(0)}
         {renderSquare(1)}

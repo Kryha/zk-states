@@ -1,6 +1,6 @@
-import { Player } from "../types";
+import { type PlayField, type Player } from "../types";
 
-export const calculateWinner = (squares: Array<Player>):Player | null => {
+export const calculateWinner = (squares: PlayField[]): Player | undefined => {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -11,7 +11,7 @@ export const calculateWinner = (squares: Array<Player>):Player | null => {
     [0, 4, 8],
     [2, 4, 6],
   ];
-  let result: Player | null = null;
+  let result: Player | undefined = undefined;
 
   lines.forEach((line) => {
     const [a, b, c] = line;

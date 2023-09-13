@@ -1,57 +1,56 @@
 import { produce } from "immer";
-import { createZKAppWorkerClient, createZKAssert, createZKState } from "zk-states";
-import type { GameBoard, Player } from "../types";
+import {
+  createZKAppWorkerClient,
+  createZKAssert,
+  createZKState,
+} from "zk-states";
+import type { PlayField, Player } from "../types";
 
-
-const worker = new Worker(new URL("../worker/zkStatesWebWorker.ts", import.meta.url), {
-  type: "module",
-});
+const worker = new Worker(
+  new URL("../worker/zkStatesWebWorker.ts", import.meta.url),
+  {
+    type: "module",
+  },
+);
 
 const workerClient = createZKAppWorkerClient(worker);
 
-//TODO:: use this variable when there are string assertions avaliable
+// use this to assert conditions in your state to create proofs
 const zkAssert = createZKAssert(workerClient);
 
-const EMPTY_BOARD = [{ squares: new Array<Player>(9).fill("") }];
-
-// ZK store for the TicTacToe game these values generate a proof on state change
 interface ZKState {
-  board: Player[];
-  history: GameBoard[];
+  board: PlayField[];
   turnNumber: number;
-  xIsNext: boolean;
+  currentPlayer: Player;
   finished: boolean;
 
-  updateBoard: (index: number, value: Player) => void;
-  setBoard: (board: Player[]) => void;
-  newTurn: (turnNumber: number) => void;
-  clearHistory: () => void;
-  setXIsNext: () => void;
+  markCell: (index: number) => void;
   setFinished: (finished: boolean) => void;
-  setHistory: (history: GameBoard[]) => void;
 }
 
-export const { useInitZKStore, useZKStore, useProof, useIsInitialized } = createZKState<ZKState>(workerClient,
-  (set) => ({
-    board: new Array<Player>(9).fill(""),
-    history: EMPTY_BOARD,
-    turnNumber: 0,
-    xIsNext: true,
-    finished: false,
+export const {
+  useQueuedAssertions,
+  useInitZKStore,
+  useZKStore,
+  useProof,
+  useIsInitialized,
+} = createZKState<ZKState>(workerClient, (set) => ({
+  board: new Array<PlayField>(9).fill(0),
+  turnNumber: 0,
+  currentPlayer: 1,
+  finished: false,
 
-    newTurn: (turnNumber) => set(() => ({ turnNumber: turnNumber })),
-    setHistory: (history) => set(() => ({ history: history })),
-    clearHistory: () => set(() => ({ history: EMPTY_BOARD })),
-    setXIsNext: () =>
-      set((state) => ({ xIsNext: state.turnNumber % 2 === 0 })),
-    setFinished: (finished) => set(() => ({ finished: finished })),
-    updateBoard: (index, value) => {
-      set(
-        produce((state: ZKState) => {
-          state.board[index] = value;
-        }),
-      );
-    },
-    setBoard: (board) => set(() => ({ board: board })),
-  }),
-  );
+  setFinished: (finished) => set(() => ({ finished: finished })),
+  markCell: (index) => {
+    set(
+      produce((state: ZKState) => {
+        // By asserting that the cell is empty, we can prove that the Player
+        // is not cheating by marking a cell that is already marked.
+        zkAssert.numeric.equals(state.board[index], 0);
+        state.board[index] = state.currentPlayer;
+        state.currentPlayer = state.currentPlayer === 2 ? 1 : 2;
+        state.turnNumber++;
+      }),
+    );
+  },
+}));
