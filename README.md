@@ -1,6 +1,6 @@
 # zk-states
 
-Verifiable state manager for React based on SnarkyJS & Mina protocol.
+Verifiable state manager for React based on o1js & Mina protocol.
 
 ## Installation
 
@@ -65,7 +65,7 @@ const { useInitZKStore, useZKStore, useProof, useIsInitialized } =
 
 ## Configuring your project
 
-ZkStates leverages SnarkyJS to enable proof generation in the browser. to enable SnarkyJS for the web, we must set the COOP and COEP headers. When using a Vite project we also need to install a plugin to enable topLevelAwait for the web worker.
+ZkStates leverages o1js to enable proof generation in the browser. to enable o1js for the web, we must set the COOP and COEP headers. When using a Vite project we also need to install a plugin to enable topLevelAwait for the web worker.
 
 ### Next.js
 
@@ -132,6 +132,24 @@ export default defineConfig({
     },
   ],
 });
+```
+
+## Deploying the StateVerifier contract
+
+By default, the library connects to an already deployed contract on the berkeley testnet. If you want to deploy your own, run the following command from the root directory:
+
+```sh
+DEPLOYER_PRIVATE_KEY=<your_wallet_private_key> MINA_URL=<graphql_mina_url> yarn deploy:zkapp
+```
+
+`MINA_URL` env variable is optional and defaults to `https://proxy.berkeley.minaexplorer.com/graphql`
+
+The deployment will take some time. If successfull, it will print out the private and public keys of the newly deployed zkApp. Keep the private key secret!
+
+You can use the public key in the library, to connect to your own deployed contract:
+
+```ts
+const { useZKState } = createZKState(workerClient, () => {...}, "berkeley", "<your_zkapp_address>");
 ```
 
 <!-- TODO: properly document functions -->

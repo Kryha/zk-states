@@ -1,5 +1,5 @@
 import { Field } from "o1js";
-import { Assert, type AssertProgramProof } from "./contract";
+import { Assert, type AssertProgramProof } from "zk-states-contracts";
 import type { AssertMethod } from "./types";
 
 const argsError = (methodName: AssertMethod) =>

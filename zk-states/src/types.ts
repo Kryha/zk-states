@@ -1,6 +1,6 @@
 import type { JsonProof } from "o1js";
+import type { AssertProgramProof, StatesVerifier } from "zk-states-contracts";
 import { z } from "zod";
-import type { AssertProgramProof, StatesVerifier } from "./contract";
 
 interface SignMessageArgs {
   message: string;
