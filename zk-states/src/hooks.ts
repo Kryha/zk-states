@@ -19,9 +19,11 @@ const zkImpl: ZKImpl = (initializer, workerClient) => (set, get, store) => {
     try {
       const oldState = cloneState(get());
       set(updater, replace);
-      workerClient.callAssertions(oldState);
+      workerClient.proveAction(oldState);
     } catch (error) {
-      if (error instanceof FailedLocalAssert) return;
+      if (error instanceof FailedLocalAssert) {
+        workerClient.clearAssertions();
+      }
     }
   };
 
@@ -86,26 +88,25 @@ export const createZKState = <T extends object>(
           publicKey58: userPublicKey58,
         });
 
-        const { proof } = await workerClient.init(
+        const proof = await workerClient.init(
           { appPublicKey58: appPublicKeyBase58 },
-          (workerRes) => {
-            switch (workerRes.updateType) {
+          () => {},
+          (payload) => {
+            switch (payload.updateType) {
               case "latestProof": {
-                setProof(workerRes.data);
-                console.log("🚀 ~ init ~ workerRes.data:", workerRes.data);
+                setProof(payload.data);
                 break;
               }
               case "updateQueue": {
-                setQueuedAssertions(workerRes.data);
-                console.log("🚀 ~ init ~ workerRes.data:", workerRes.data);
+                setQueuedAssertions(payload.data);
                 break;
               }
               case "isProving": {
-                setIsProving(workerRes.data);
+                setIsProving(payload.data);
                 break;
               }
               case "proofError": {
-                const oldState = workerClient.getState(workerRes.callId);
+                const oldState = workerClient.getState(payload.callId);
                 workerClient.clearHistory();
                 rollback(oldState as T);
                 resetQueue();
@@ -113,7 +114,7 @@ export const createZKState = <T extends object>(
                 break;
               }
               case "proofSuccess": {
-                workerClient.deleteState(workerRes.callId);
+                workerClient.deleteState(payload.callId);
                 setProofFailed(false);
                 break;
               }
