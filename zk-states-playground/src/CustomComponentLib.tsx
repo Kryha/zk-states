@@ -14,6 +14,7 @@ const zkAssert = createZKAssert(workerClient);
 interface ZKState {
   num: number;
   setNum: (num: number) => void;
+  setNumFail: (num: number) => void;
 }
 
 const {
@@ -35,11 +36,17 @@ const {
 
       return { num };
     }),
+  setNumFail: (num) =>
+    set(() => {
+      zkAssert.numeric.equalsNoLocalCheck(num, 5);
+      return { num };
+    }),
 }));
 
 const CustomComponentLib = () => {
   const num = useZKStore((state) => state.num);
   const setNum = useZKStore((state) => state.setNum);
+  const setNumFail = useZKStore((state) => state.setNumFail);
 
   const isInitialized = useIsInitialized();
   const proof = useProof();
@@ -58,8 +65,8 @@ const CustomComponentLib = () => {
   return (
     <div>
       <p>Queued assertions: {asssertions.length}</p>
-      <p>Is proving: {isProving}</p>
-      <p>Has wallet: {hasWallet}</p>
+      <p>Is proving: {String(isProving)}</p>
+      <p>Has wallet: {String(hasWallet)}</p>
       {proofFailed && <p>Proof generation failed</p>}
 
       <p>Num: {num}</p>
@@ -67,6 +74,7 @@ const CustomComponentLib = () => {
       <button onClick={() => setNum(1)}>Set 1</button>
       <button onClick={() => setNum(2)}>Set 2</button>
       <button onClick={() => setNum(3)}>Set 3</button>
+      <button onClick={() => setNumFail(3)}>Set 3 fail</button>
 
       {proof && <p>{proof.proof}</p>}
 
