@@ -129,7 +129,6 @@ interface InititializationProgressUpdate {
 }
 
 export type UIUpdate =
-  | InititializationProgressUpdate
   | LatestProofUpdate
   | UpdateQueueUpdate
   | IsProvingUpdate
@@ -140,7 +139,9 @@ interface WorkerErrorUpdate {
   updateType: "workerError";
 }
 
-export type WorkerStateUpdate = WorkerErrorUpdate;
+export type WorkerStateUpdate =
+  | WorkerErrorUpdate
+  | InititializationProgressUpdate;
 
 export interface TxRes {
   transaction: string;
