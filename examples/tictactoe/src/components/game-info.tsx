@@ -2,13 +2,14 @@ import { type FC } from "react";
 import { Loading } from "./loading";
 import { ProofQueue } from "./proof-queue";
 import { VerifyButton } from "./verify-button";
+import { InitializationProgress } from "zk-states/dist/types";
 
 type GameInfoProps = {
   isInitialized: boolean;
   assertionQueue: string[];
   isGameFinished: boolean;
   status: string;
-  initProgress: string;
+  initProgress: InitializationProgress;
 };
 
 export const GameInfo: FC<GameInfoProps> = ({

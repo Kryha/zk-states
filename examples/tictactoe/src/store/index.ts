@@ -10,7 +10,7 @@ const worker = new Worker(
   new URL("../worker/zkStatesWebWorker.ts", import.meta.url),
   {
     type: "module",
-  },
+  }
 );
 
 const workerClient = createZKAppWorkerClient(worker);
@@ -31,6 +31,7 @@ interface ZKState {
 export const {
   useQueuedAssertions,
   useInitZKStore,
+  useInitializationProgress,
   useZKStore,
   useProof,
   useIsInitialized,
@@ -50,7 +51,7 @@ export const {
         state.board[index] = state.currentPlayer;
         state.currentPlayer = state.currentPlayer === 2 ? 1 : 2;
         state.turnNumber++;
-      }),
+      })
     );
   },
 }));
