@@ -17,7 +17,7 @@ import {
   fetchAccountArgsSchema,
   initArgsSchema,
   setMinaNetworkArgsSchema,
-  initializationProgress,
+  InitializationProgress,
 } from "./types";
 import { logger } from "./utils";
 
@@ -131,13 +131,14 @@ const workerFunctions = {
 
     post({
       updateType: "initializationProgress",
-      status: "compiling program",
+      status: "compilingProgram",
     });
+
     await Assert.compile();
 
     post({
       updateType: "initializationProgress",
-      status: "compiling contract",
+      status: "compilingContract",
     });
 
     await StatesVerifier.compile();
@@ -150,7 +151,7 @@ const workerFunctions = {
 
     post({
       updateType: "initializationProgress",
-      status: "creating initial proof",
+      status: "creatingInitialProof",
     });
 
     const creationProof = await Assert.init();
@@ -158,7 +159,7 @@ const workerFunctions = {
 
     post({
       updateType: "initializationProgress",
-      status: "initialization done",
+      status: "done",
     });
 
     return { proof: creationProof.toJSON() };

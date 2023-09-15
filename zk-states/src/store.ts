@@ -1,11 +1,11 @@
 import type { JsonProof, PublicKey } from "o1js";
 import { create } from "zustand";
-import { type initializationProgress } from "./types";
+import { type InitializationProgress } from "./types";
 
 export interface LibStateVars {
   proof?: JsonProof;
   isInitialized: boolean;
-  initializationProgress: initializationProgress;
+  initializationProgress: InitializationProgress;
   isProving: boolean;
   proofFailed: boolean;
   queuedAssertions: string[];
@@ -21,7 +21,7 @@ export interface LibStateActions {
     accountExists: boolean,
   ) => void;
   setProof: (proof: JsonProof) => void;
-  setInitializationProgress: (status: initializationProgress) => void;
+  setInitializationProgress: (status: InitializationProgress) => void;
   setHasWallet: (hasWallet: boolean) => void;
   setIsProving: (isProving: boolean) => void;
   setQueuedAssertions: (assertions: string[]) => void;
@@ -34,7 +34,7 @@ export type LibState = LibStateVars & LibStateActions;
 export const useLibStore = create<LibState>((set) => ({
   isInitialized: false,
   isProving: false,
-  initializationProgress: "initializing",
+  initializationProgress: "pendingStart",
   queuedAssertions: [],
   hasBeenReset: false,
   proofFailed: false,
