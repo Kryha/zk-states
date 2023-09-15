@@ -21,6 +21,7 @@ const {
   useInitZKStore,
   useProof,
   useIsInitialized,
+  useInitializationProgress,
   useQueuedAssertions,
   useIsProving,
   useProofFailed,
@@ -48,12 +49,13 @@ const CustomComponentLib = () => {
   const proofFailed = useProofFailed();
   const hasWallet = useHasWallet();
   const { verificationStatus, verify } = useVerify();
+  const initProgress = useInitializationProgress();
 
   useInitZKStore();
 
   if (!hasWallet) return <p>No wallet found</p>;
 
-  if (!isInitialized) return <p>Initializing...</p>;
+  if (!isInitialized) return <p>{initProgress}</p>;
 
   return (
     <div>
@@ -71,6 +73,7 @@ const CustomComponentLib = () => {
       {proof && <p>{proof.proof}</p>}
 
       <p>Verification status: {verificationStatus}</p>
+      <p>Initialization progress: {initProgress}</p>
       <button
         disabled={verificationStatus === "pending" || asssertions.length > 0}
         onClick={() => void verify()}

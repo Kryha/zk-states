@@ -1,9 +1,11 @@
 import type { JsonProof, PublicKey } from "o1js";
 import { create } from "zustand";
+import { type initializationProgress } from "./types";
 
 export interface LibStateVars {
   proof?: JsonProof;
   isInitialized: boolean;
+  initializationProgress: initializationProgress;
   isProving: boolean;
   proofFailed: boolean;
   queuedAssertions: string[];
@@ -19,6 +21,7 @@ export interface LibStateActions {
     accountExists: boolean,
   ) => void;
   setProof: (proof: JsonProof) => void;
+  setInitializationProgress: (status: initializationProgress) => void;
   setHasWallet: (hasWallet: boolean) => void;
   setIsProving: (isProving: boolean) => void;
   setQueuedAssertions: (assertions: string[]) => void;
@@ -31,6 +34,7 @@ export type LibState = LibStateVars & LibStateActions;
 export const useLibStore = create<LibState>((set) => ({
   isInitialized: false,
   isProving: false,
+  initializationProgress: "initializing",
   queuedAssertions: [],
   hasBeenReset: false,
   proofFailed: false,
@@ -41,6 +45,8 @@ export const useLibStore = create<LibState>((set) => ({
     set({ proof, userPublicKey, accountExists, isInitialized: true }),
   setHasWallet: (hasWallet) => set({ hasWallet }),
   setProof: (proof) => set({ proof }),
+  setInitializationProgress: (initializationProgress) =>
+    set({ initializationProgress }),
   setIsProving: (isProving) => set({ isProving }),
   setQueuedAssertions: (queuedAssertions) => set({ queuedAssertions }),
   setProofFailed: (proofFailed) => set({ proofFailed }),

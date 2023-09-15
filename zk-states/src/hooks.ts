@@ -56,6 +56,9 @@ export const createZKState = <T extends object>(
     const resetQueue = useLibStore((state) => state.resetQueue);
     const setProofFailed = useLibStore((state) => state.setProofFailed);
     const setHasWallet = useLibStore((state) => state.setHasWallet);
+    const setInitializationProgress = useLibStore(
+      (state) => state.setInitializationProgress,
+    );
 
     const rollback = useZKStore((state) => state.rollback);
 
@@ -117,6 +120,10 @@ export const createZKState = <T extends object>(
                 setProofFailed(false);
                 break;
               }
+              case "initializationProgress": {
+                setInitializationProgress(workerRes.status);
+                break;
+              }
             }
           },
         );
@@ -127,6 +134,7 @@ export const createZKState = <T extends object>(
     }, [
       initLibStore,
       isInitialized,
+      setInitializationProgress,
       resetQueue,
       rollback,
       setHasWallet,
@@ -176,6 +184,8 @@ export const createZKState = <T extends object>(
     useLibStore((state) => state.queuedAssertions);
   const useIsProving = () => useLibStore((state) => state.isProving);
   const useProofFailed = () => useLibStore((state) => state.proofFailed);
+  const useInitializationProgress = () =>
+    useLibStore((state) => state.initializationProgress);
   const useHasWallet = () => useLibStore((state) => state.hasWallet);
 
   return {
@@ -184,6 +194,7 @@ export const createZKState = <T extends object>(
     useProof,
     useIsInitialized,
     useQueuedAssertions,
+    useInitializationProgress,
     useIsProving,
     useProofFailed,
     useVerify,

@@ -128,8 +128,20 @@ interface ProofSuccessUpdate {
   updateType: "proofSuccess";
   callId: string;
 }
+export type initializationProgress =
+  | "initializing"
+  | "compiling program"
+  | "compiling contract"
+  | "creating initial proof"
+  | "initialization done";
+
+interface inititializationProgressUpdate {
+  updateType: "initializationProgress";
+  status: initializationProgress;
+}
 
 export type WorkerStateUpdate =
+  | inititializationProgressUpdate
   | LatestProofUpdate
   | UpdateQueueUpdate
   | IsProvingUpdate
