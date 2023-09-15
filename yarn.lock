@@ -7427,9 +7427,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"o1js@npm:^0.12.1":
-  version: 0.12.1
-  resolution: "o1js@npm:0.12.1"
+"o1js@npm:^0.13.0":
+  version: 0.13.0
+  resolution: "o1js@npm:0.13.0"
   dependencies:
     blakejs: 1.2.1
     detect-gpu: ^5.0.5
@@ -7439,7 +7439,7 @@ __metadata:
     tslib: ^2.3.0
   bin:
     snarky-run: src/build/run.js
-  checksum: 50b21fa4a69490ca2018f850a17336a71cf4c6e2bd1607acf3f24394ca86e22065c68c6bf323ecd3fb7adabcc8c258b7be78db5b6ccf1ba60ea7b104a3a90098
+  checksum: d5b0f81702fa32d986c77aa3e4d2ed1146d1e32dd9f274d85a921a3401aae497a6d315e9b685e790fa2dc98fb7519f37d1ef3d1269ac76c217e65e54a75d8f2d
   languageName: node
   linkType: hard
 
@@ -9856,13 +9856,13 @@ __metadata:
     husky: ^7.0.1
     jest: ^27.3.1
     lint-staged: ^11.0.1
-    o1js: ^0.12.1
+    o1js: ^0.13.0
     prettier: ^2.3.2
     ts-jest: ^27.0.7
     typescript: ^4.7.2
     zod: ^3.22.2
   peerDependencies:
-    o1js: 0.12.*
+    o1js: 0.13.*
   languageName: unknown
   linkType: soft
 
@@ -9913,7 +9913,7 @@ __metadata:
     eslint-plugin-react-hooks: ^4.6.0
     eslint-plugin-vitest: ^0.2.8
     jsdom: ^22.1.0
-    o1js: ^0.12.1
+    o1js: ^0.13.0
     prettier: ^3.0.0
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -9931,7 +9931,7 @@ __metadata:
     zod: ^3.21.4
     zustand: ^4.3.9
   peerDependencies:
-    o1js: ">=0.12.1"
+    o1js: ">=0.13.0"
     react: ">=18.0.0"
     react-dom: ">=18.0.0"
     zustand: ">=4.3.9"

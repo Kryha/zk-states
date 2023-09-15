@@ -34,7 +34,7 @@ export const createZKState = <T extends object>(
   workerClient: ZkAppWorkerClient,
   createState: StateCreator<T, [], []>,
   networkName: MinaNetwork = "berkeley",
-  appPublicKeyBase58 = "B62qrquKapqyBXxtEBGQTUKLzHeD7xJnxG1qro83HjXhFj7rBiLTuXD",
+  appPublicKeyBase58 = "B62qnQqrPW5Cx71WavaPjUfUzdx1eEgfnFXEqeQV9m8DKJn3bUW4BF8",
 ) => {
   const useZKStore = create<T & { rollback: (oldState: T) => void }>(
     zkImpl(
@@ -93,7 +93,14 @@ export const createZKState = <T extends object>(
 
         const proof = await workerClient.init(
           { appPublicKey58: appPublicKeyBase58 },
-          () => {},
+          (event) => {
+            switch (event.updateType) {
+              case "initializationProgress": {
+                setInitializationProgress(event.status);
+                break;
+              }
+            }
+          },
           (payload) => {
             switch (payload.updateType) {
               case "latestProof": {
@@ -119,10 +126,6 @@ export const createZKState = <T extends object>(
               case "proofSuccess": {
                 workerClient.deleteState(payload.callId);
                 setProofFailed(false);
-                break;
-              }
-              case "initializationProgress": {
-                setInitializationProgress(workerRes.status);
                 break;
               }
             }

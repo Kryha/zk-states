@@ -23,4 +23,5 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: mv ./README.md ./zk-states/
+      - run: cd zk-states-contracts && yarn npm publish --access public --tolerate-republish
       - run: cd zk-states && yarn npm publish --access public --tolerate-republish
