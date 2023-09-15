@@ -62,7 +62,7 @@ export const Assert = Experimental.ZkProgram({
 
       method(earlierProof: AssertProof, a: Field, b: Field) {
         earlierProof.verify();
-        a.lessThanOrEqual(b);
+        a.assertLessThanOrEqual(b);
       },
     },
   },
