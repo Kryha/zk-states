@@ -10,6 +10,7 @@ import {
   fetchAccountArgsSchema,
   initArgsSchema,
   setMinaNetworkArgsSchema,
+  InitializationProgress,
 } from "./types";
 import { logger } from "./utils";
 
@@ -39,22 +40,38 @@ const workerFunctions = {
   init: async (args: unknown) => {
     const { appPublicKey58 } = initArgsSchema.parse(args);
 
-    logger.info("[zk-states worker] compiling program...");
-    await Assert.compile();
-    logger.info("[zk-states worker] program compiled");
+    post({
+      updateType: "initializationProgress",
+      status: "compilingProgram",
+    });
 
-    logger.info("[zk-states worker] compiling contract...");
+    await Assert.compile();
+
+    post({
+      updateType: "initializationProgress",
+      status: "compilingContract",
+    });
+
     await StatesVerifier.compile();
+
     logger.info("[zk-states worker] contract compiled");
 
     state.statesVerifier = new StatesVerifier(
       PublicKey.fromBase58(appPublicKey58),
     );
 
-    logger.info("[zk-states worker] creating init proof...");
+    post({
+      updateType: "initializationProgress",
+      status: "creatingInitialProof",
+    });
+
     const creationProof = await Assert.init();
     state.latestProof = creationProof;
-    logger.info("[zk-states worker] init done");
+
+    post({
+      updateType: "initializationProgress",
+      status: "done",
+    });
 
     return creationProof.toJSON();
   },
