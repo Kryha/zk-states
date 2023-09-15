@@ -3102,6 +3102,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"o1js@npm:^0.13.0":
+  version: 0.13.0
+  resolution: "o1js@npm:0.13.0"
+  dependencies:
+    blakejs: 1.2.1
+    detect-gpu: ^5.0.5
+    isomorphic-fetch: ^3.0.0
+    js-sha256: ^0.9.0
+    reflect-metadata: ^0.1.13
+    tslib: ^2.3.0
+  bin:
+    snarky-run: src/build/run.js
+  checksum: d5b0f81702fa32d986c77aa3e4d2ed1146d1e32dd9f274d85a921a3401aae497a6d315e9b685e790fa2dc98fb7519f37d1ef3d1269ac76c217e65e54a75d8f2d
+  languageName: node
+  linkType: hard
+
 "object-assign@npm:^4.1.1":
   version: 4.1.1
   resolution: "object-assign@npm:4.1.1"
@@ -3669,22 +3685,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"snarkyjs@npm:^0.12.1":
-  version: 0.12.1
-  resolution: "snarkyjs@npm:0.12.1"
-  dependencies:
-    blakejs: 1.2.1
-    detect-gpu: ^5.0.5
-    isomorphic-fetch: ^3.0.0
-    js-sha256: ^0.9.0
-    reflect-metadata: ^0.1.13
-    tslib: ^2.3.0
-  bin:
-    snarky-run: src/build/run.js
-  checksum: a96d866e7a6651b8e5811d5dcac989566a0a9d8357452c249ecbd0f6c7aa3a45f93210d54a451decc4f7c88282ef3463d180bea6d03493d7e632289bb9fa524c
-  languageName: node
-  linkType: hard
-
 "socks-proxy-agent@npm:^7.0.0":
   version: 7.0.0
   resolution: "socks-proxy-agent@npm:7.0.0"
@@ -3890,14 +3890,14 @@ __metadata:
     eslint-plugin-react-hooks: ^4.6.0
     eslint-plugin-vitest: ^0.2.8
     immer: ^10.0.2
+    o1js: ^0.13.0
     react: ^18.2.0
     react-dom: ^18.2.0
-    snarkyjs: ^0.12.1
     typescript: ^5.0.2
     typescript-eslint: ^0.0.1-alpha.0
     vite: ^4.4.5
     vite-plugin-top-level-await: ^1.3.1
-    zk-states: ^0.0.17
+    zk-states: ^0.1.1
     zod: ^3.22.0
     zustand: ^4.4.1
   languageName: unknown
@@ -4322,18 +4322,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zk-states@npm:^0.0.17":
-  version: 0.0.17
-  resolution: "zk-states@npm:0.0.17"
+"zk-states-contracts@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "zk-states-contracts@npm:0.0.2"
+  peerDependencies:
+    o1js: 0.13.*
+  checksum: 1eabae33e7520792d9a2e33c758e9741c7852a58452ee9dead7da2a1ec278c4afdd8a1f1c1effb2cafdecb0a9496838bd225040e5ee6f8f60f8c62fd7b8674ee
+  languageName: node
+  linkType: hard
+
+"zk-states@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "zk-states@npm:0.1.1"
   dependencies:
     uuid: ^9.0.0
+    zk-states-contracts: ^0.0.2
     zod: ^3.21.4
   peerDependencies:
+    o1js: ">=0.13.0"
     react: ">=18.0.0"
     react-dom: ">=18.0.0"
-    snarkyjs: ">=0.11.0"
     zustand: ">=4.3.9"
-  checksum: 39b837c8cdfe3e55757d14eb5c4d933c9c16ffc487348d5c7f542a7fd091de685f32e317d2b8ea973b0e1fed16b62f6b3eda30c3f0c1e9b77d58a0c8c008ff2a
+  checksum: bd8695b551e07a1bbaac62a7f74218fa8391b66d3180c0934274193300d3e337beabd5b64928d449ea40c5ddc6de613f1047cbd80b1d5bdd03490497f50f8c22
   languageName: node
   linkType: hard
 
