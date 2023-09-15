@@ -1,19 +1,12 @@
 import { Mina, PublicKey, fetchAccount } from "o1js";
-import {
-  Assert,
-  type AssertProgramProof,
-  StatesVerifier,
-} from "zk-states-contracts";
+import { Assert, StatesVerifier } from "zk-states-contracts";
 import { prove } from "./prove";
 import {
-  type AssertMethod,
   type MinaNetwork,
-  type QueuedAssertion,
-  type TransitionRes,
   type TxRes,
   type WorkerState,
   type WorkerStateUpdate,
-  callAssertionArgsSchema,
+  assertionSchema,
   fetchAccountArgsSchema,
   initArgsSchema,
   setMinaNetworkArgsSchema,
@@ -27,90 +20,8 @@ const minaEndpoints: Record<MinaNetwork, string> = {
   berkeley: "https://proxy.berkeley.minaexplorer.com/graphql",
 };
 
-const stringifyUpdateQueue = (assertions: QueuedAssertion[]) => {
-  const res = assertions.flatMap((call) =>
-    call.proveFunctions.flatMap((assertion) => assertion.name),
-  );
-  return res;
-};
-
 const state: WorkerState = {
-  updateQueue: [],
   isProving: false,
-};
-
-setInterval(async () => {
-  if (!state.latestProof || state.isProving || !state.updateQueue.length) {
-    return;
-  }
-
-  const nextUpdate = state.updateQueue.at(0);
-  if (!nextUpdate) return;
-  const { callId, proveFunctions } = nextUpdate;
-
-  state.isProving = true;
-  post({
-    updateType: "isProving",
-    data: state.isProving,
-  });
-
-  let localProof = state.latestProof;
-  let hasSucceeded = true;
-
-  for (const prove of proveFunctions) {
-    if (hasSucceeded) {
-      try {
-        localProof = await prove.method(localProof);
-
-        post({
-          updateType: "latestProof",
-          data: localProof.toJSON(),
-        });
-      } catch (error) {
-        logger.error("Update queue error:", error);
-
-        hasSucceeded = false;
-        state.updateQueue = [];
-
-        post({ updateType: "proofError", callId });
-        post({
-          updateType: "latestProof",
-          data: state.latestProof.toJSON(),
-        });
-      }
-    }
-  }
-
-  if (hasSucceeded) {
-    state.updateQueue.shift();
-    state.latestProof = localProof;
-
-    post({
-      updateType: "proofSuccess",
-      callId,
-    });
-    post({
-      updateType: "updateQueue",
-      data: stringifyUpdateQueue(state.updateQueue),
-    });
-  }
-
-  state.isProving = false;
-  post({
-    updateType: "isProving",
-    data: state.isProving,
-  });
-}, 3000);
-
-const generateAssertion = (methodName: AssertMethod, methodArgs: string[]) => {
-  const method = async (prevProof: AssertProgramProof) => {
-    logger.info("[zk-states worker] creating update proof...");
-    const proof = await prove(prevProof, methodName, methodArgs);
-    logger.info("[zk-states worker] update proof generated");
-
-    return proof;
-  };
-  return { name: methodName, method };
 };
 
 const workerFunctions = {
@@ -126,7 +37,7 @@ const workerFunctions = {
     return fetchAccount({ publicKey });
   },
 
-  init: async (args: unknown): Promise<TransitionRes> => {
+  init: async (args: unknown) => {
     const { appPublicKey58 } = initArgsSchema.parse(args);
 
     post({
@@ -162,32 +73,31 @@ const workerFunctions = {
       status: "done",
     });
 
-    return { proof: creationProof.toJSON() };
+    return creationProof.toJSON();
   },
 
-  callAssertions: (args: unknown) => {
-    if (!state.latestProof) throw new Error("Program not initialized");
+  proveAssertion: async (args: unknown) => {
+    if (state.isProving || !state.latestProof) return;
 
-    const { methods, callId } = callAssertionArgsSchema.parse(args);
+    try {
+      logger.info("[zk-states worker] generating update proof...");
+      const assertion = assertionSchema.parse(args);
+      state.latestProof = await prove(
+        state.latestProof,
+        assertion.name,
+        assertion.args,
+      );
+      logger.info("[zk-states worker] update proof generated");
+    } catch (error) {
+      return;
+    }
 
-    const proveFunctions = methods.map(({ name, args }) =>
-      generateAssertion(name, args),
-    );
-
-    state.updateQueue.push({ callId, proveFunctions });
-
-    post({
-      updateType: "updateQueue",
-      data: stringifyUpdateQueue(state.updateQueue),
-    });
+    return state.latestProof.toJSON();
   },
 
   verify: async (_args: unknown): Promise<TxRes> => {
     if (!state.statesVerifier) throw new Error("Contract not initialized");
     if (!state.latestProof) throw new Error("No proof to verify");
-    if (state.updateQueue.length !== 0) {
-      throw new Error("Update queue must be empty");
-    }
 
     logger.info("[zk-states worker] generating mina transaction...");
     const transaction = await Mina.transaction(() => {
@@ -205,7 +115,10 @@ const workerFunctions = {
 
     logger.info("[zk-states worker] verify completed");
 
-    return { transaction: transaction.toJSON() };
+    return {
+      transaction: transaction.toJSON(),
+      proof: state.latestProof.toJSON(),
+    };
   },
 };
 
