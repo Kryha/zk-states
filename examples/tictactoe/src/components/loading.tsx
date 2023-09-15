@@ -1,7 +1,11 @@
 import type { FC } from "react";
 import "./styles.css";
 
-export const Loading: FC = () => {
+type LoadingProps = {
+  initProgress: string;
+};
+
+export const Loading: FC<LoadingProps> = ({ initProgress }) => {
   return (
     <div>
       <p>
@@ -9,7 +13,7 @@ export const Loading: FC = () => {
         application!
       </p>
       <br />
-      <h3>Please wait...</h3>
+      <h3>{initProgress}</h3>
       <img
         style={{ marginTop: "1rem" }}
         src="../public/loading.svg"

@@ -8,6 +8,7 @@ type GameInfoProps = {
   assertionQueue: string[];
   isGameFinished: boolean;
   status: string;
+  initProgress: string;
 };
 
 export const GameInfo: FC<GameInfoProps> = ({
@@ -15,6 +16,7 @@ export const GameInfo: FC<GameInfoProps> = ({
   assertionQueue,
   isGameFinished,
   status,
+  initProgress,
 }) => {
   return (
     <div
@@ -47,7 +49,7 @@ export const GameInfo: FC<GameInfoProps> = ({
           />
         </div>
       ) : (
-        <Loading />
+        <Loading initProgress={initProgress} />
       )}
     </div>
   );
