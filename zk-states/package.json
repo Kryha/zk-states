@@ -1,6 +1,6 @@
 {
   "name": "zk-states",
-  "version": "0.0.20",
+  "version": "0.1.0",
   "license": "MIT",
   "description": "Verifiable state manager for React based on o1js & Mina protocol",
   "typesVersions": {
