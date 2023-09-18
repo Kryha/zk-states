@@ -174,7 +174,7 @@ Executes the web worker script.
 
 `testRef` param is useful when testing in a non browser environment. Do not use it in development or production. Check out our test files to see how it's being used.
 
-> ⚠️ WARNING: do not import or execute in the main thread, but use it as explained in the example above!
+> ⚠️ WARNING: do not import or execute this function in the main thread, but use it as illustrated in the example above!
 
 ### `createZKAppWorkerClient`
 
