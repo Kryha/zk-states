@@ -12,6 +12,8 @@ npm install zk-states
 yarn add zk-states
 ```
 
+> ⚠️ IMPORTANT: To properly execute the library, [Auro wallet](https://www.aurowallet.com/) extension has to be installed in the browser.
+
 ## Defining a ZK state
 
 `zk-states` requires a web worker in order to execute the heaviest ZK computations. Define a file where the web worker code will run, here we will name it `zkStatesWorker.ts`, but you can use whatever name you prefer. The content of your file should look like this:
@@ -216,7 +218,7 @@ Refer to [this section](#defining-a-zk-state) for an example on how to properly 
 
 ### `useZKStore`
 
-Allows you to access the state from a React component.
+Allows you to access the state from a React component. Take a look at [Zustand's documentation](https://github.com/pmndrs/zustand#then-bind-your-components-and-thats-it) for usage examples.
 
 ### `useInitZKStore`
 
