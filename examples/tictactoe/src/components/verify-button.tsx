@@ -13,7 +13,19 @@ export const VerifyButton: FC<VerifyButtonProps> = ({
     <div>
       <h3 style={{ marginBottom: "0.5rem" }}>Verify</h3>
       <div style={{ display: "flex", flexDirection: "row", gap: "2rem" }}>
-        <button disabled={!gameFinished || assertionQueue.length > 0}>
+        <button
+          style={{
+            borderRadius: "8px",
+            cursor: "pointer",
+            borderColor: "#afa3d1",
+            borderWidth: "2px",
+            borderStyle: "solid",
+            color: "#afa3d1",
+            padding: "0.5rem 1rem",
+            backgroundColor: "transparent",
+          }}
+          disabled={!gameFinished || assertionQueue.length > 0}
+        >
           Verify the game
         </button>
       </div>
