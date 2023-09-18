@@ -1,5 +1,4 @@
-import { Board } from "./components";
-import { GameInfo } from "./components/game-info";
+import { GameInfo, Board } from "./components";
 import { usePlayerturn } from "./hooks";
 import {
   useInitZKStore,
