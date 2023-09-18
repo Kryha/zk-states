@@ -162,4 +162,74 @@ If you are using Next.js, you might wanna do the following:
 2. Write [this init script](https://github.com/o1-labs/docs2/blob/main/examples/zkapps/04-zkapp-browser-ui/ui/src/pages/reactCOIServiceWorker.ts) in your main codebase
 3. [Import it](https://github.com/o1-labs/docs2/blob/main/examples/zkapps/04-zkapp-browser-ui/ui/src/pages/_app.page.tsx) in your root component in order to execute it
 
-<!-- TODO: properly document functions -->
+## Library functions
+
+### `initZKWorker`
+
+`initZKWorker(testRef?: Window & typeof globalThis): void`
+
+Executes the web worker script.
+
+`testRef` param is useful when testing in a non browser environment. Do not use it in development or production. Check out our test files to see how it's being used.
+
+> WARNING: do not import or execute in the main thread, but use it as explained in the example above!
+
+### `createZKAppWorkerClient`
+
+`createZKAppWorkerClient(worker: Worker): ZkAppWorkerClient`
+
+Generates a worker client instance that communicates with the provided web worker. `ZkAppWorkerClient` is used internally and you don't have to interact with it directly.
+
+### `createZKState`
+
+This is the main function of the library, as it generates the hooks that allow you to interact with the library from a React component. It accepts the following parameters:
+
+- `workerClient: ZkAppWorkerClient` - worker client instance generated with `createZKAppWorkerClient` function.
+- `createState: StateCreator<T, [], []>` - Zustand state creator function. Refer to [this documentation](https://github.com/pmndrs/zustand#first-create-a-store) for more information on how to define global state with Zustand.
+- `networkName: MinaNetwork` - specifies which network to connect to. Defaults to `"berkeley"`.
+- `appPublicKeyBase58: string` - specifies the address of the deployed `StatesVerifier` zkApp. Defaults to the address of a `StatesVerifier` zkApp we pre-deployed on the Berkeley testnet. In the previous sections you can find instructions on how to deploy your own zkApp.
+
+The function returns an object containing the hooks documented in [the next section](#hooks).
+
+### `createZKAssert`
+
+Takes the worker client as a param and returns the assertion library. Assertions are functions that will either return `void` when the internal evaluation is successful or will throw a `FailedLocalAssert` error if unsuccessful. Assertions are supposed to be called inside actions defined in `createZKState` state creator, since those are wrapped with a middleware that will handle the thrown error.
+
+If all the assertions called inside an action succeed, they will be sequentially processed by the web worker, which will generate their proofs. If an assertion fails locally, all the other assertions specified in the action will not be submitted to the web worker and the local state won't be updated. If an assertion succeeds locally, but later fails when being proven in the web worker, the local state will automatically rollback to the latest valid state.
+
+To generate the assertion library:
+
+```ts
+const zkAssert = createZKAssert(workerClient);
+```
+
+To call an assertion:
+
+```ts
+// will succeed if `value` is greater than 5 and throw otherwise
+zkAssert.numeric.greaterThan(value, 5);
+```
+
+Refer to [this section](#defining-a-zk-state) for an example on how to properly call assertions.
+
+## Hooks
+
+### `useZKStore`
+
+### `useInitZKStore`
+
+### `useProof`
+
+### `useIsInitialized`
+
+### `useInitializationProgress`
+
+### `useQueuedAssertions`
+
+### `useIsProving`
+
+### `useProofFailed`
+
+### `useVerify`
+
+### `useHasWallet`
