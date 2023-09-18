@@ -152,4 +152,14 @@ You can use the public key in the library, to connect to your own deployed contr
 const { useZKState } = createZKState(workerClient, () => {...}, "berkeley", "<your_zkapp_address>");
 ```
 
+## Cross-origin isolation
+
+When deploying an application to production, you want to configure your COOP and COEP headers to allow web workers to work properly. [Here](https://github.com/gzuidhof/coi-serviceworker) you can find instructions on how to do the configuration.
+
+If you are using Next.js, you might wanna do the following:
+
+1. Add the `coi-serviceworker` script in the [`public/` directory](https://github.com/o1-labs/docs2/tree/main/examples/zkapps/04-zkapp-browser-ui/ui/public)
+2. Write [this init script](https://github.com/o1-labs/docs2/blob/main/examples/zkapps/04-zkapp-browser-ui/ui/src/pages/reactCOIServiceWorker.ts) in your main codebase
+3. [Import it](https://github.com/o1-labs/docs2/blob/main/examples/zkapps/04-zkapp-browser-ui/ui/src/pages/_app.page.tsx) in your root component in order to execute it
+
 <!-- TODO: properly document functions -->
