@@ -172,7 +172,7 @@ Executes the web worker script.
 
 `testRef` param is useful when testing in a non browser environment. Do not use it in development or production. Check out our test files to see how it's being used.
 
-> WARNING: do not import or execute in the main thread, but use it as explained in the example above!
+> ⚠️ WARNING: do not import or execute in the main thread, but use it as explained in the example above!
 
 ### `createZKAppWorkerClient`
 
@@ -216,20 +216,42 @@ Refer to [this section](#defining-a-zk-state) for an example on how to properly 
 
 ### `useZKStore`
 
+Allows you to access the state from a React component.
+
 ### `useInitZKStore`
+
+Initializes the zk-store library and connects to Auro wallet. This hook is supposed to be called once per application, possibly in a high level component.
 
 ### `useProof`
 
+Returns the latest valid proof.
+
 ### `useIsInitialized`
+
+Returns a boolean that indicates if the library has been initialized ot not.
 
 ### `useInitializationProgress`
 
+Returns a string that shows the current initialization stage.
+
 ### `useQueuedAssertions`
+
+Returns an array containing a stringified representation of the assertions that are waiting to be proven by the web worker.
 
 ### `useIsProving`
 
+Returns a boolean that indicates if the web worker is currently generating a proof.
+
 ### `useProofFailed`
+
+Returns a boolean that is `true` if the latest web worker proof generation failed.
 
 ### `useVerify`
 
+Returns a `verify` function that will call the remote proof verification on the Mina blockchain. User will have to approve the transaction through their wallet.
+
 ### `useHasWallet`
+
+Returns a boolean that is `true` if the [Auro Wallet](https://www.aurowallet.com/) extension is installed in the browser.
+
+> ⚠️ IMPORTANT: The extension has to be installed in order to use the library!
