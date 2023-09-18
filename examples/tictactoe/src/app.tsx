@@ -3,6 +3,7 @@ import { GameInfo } from "./components/game-info";
 import { usePlayerturn } from "./hooks";
 import {
   useInitZKStore,
+  useInitializationProgress,
   useIsInitialized,
   useQueuedAssertions,
   useZKStore,
@@ -14,6 +15,7 @@ export default function TicTacToe() {
   const board = useZKStore((state) => state.board);
   const isInitialized = useIsInitialized();
   const assertionQueue = useQueuedAssertions();
+  const initProgress = useInitializationProgress();
   useInitZKStore();
 
   const handleClick = (i: number) => {
@@ -39,6 +41,7 @@ export default function TicTacToe() {
           assertionQueue={assertionQueue}
           status={status}
           isGameFinished={finished}
+          initProgress={initProgress}
         />
       </div>
       <div className="footer">

@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "immer": "^10.0.2",
+    "o1js": "^0.13.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "snarkyjs": "^0.12.1",
     "typescript-eslint": "^0.0.1-alpha.0",
-    "zk-states": "^0.0.17",
+    "zk-states": "^0.1.1",
     "zod": "^3.22.0",
     "zustand": "^4.4.1"
   },

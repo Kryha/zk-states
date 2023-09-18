@@ -1,7 +1,27 @@
 import type { FC } from "react";
 import "./styles.css";
+import { InitializationProgress } from "zk-states/dist/types";
 
-export const Loading: FC = () => {
+type LoadingProps = {
+  initProgress: InitializationProgress;
+};
+
+export const Loading: FC<LoadingProps> = ({ initProgress }) => {
+  const getProgress = (progress: InitializationProgress) => {
+    switch (progress) {
+      case "pendingStart":
+        return "Initializing";
+      case "compilingProgram":
+        return "Compiling ZK-Program";
+      case "compilingContract":
+        return "Compiling ZK-Contract";
+      case "creatingInitialProof":
+        return "Creating Initial Proof";
+      case "done":
+        return "Done";
+    }
+  };
+
   return (
     <div>
       <p>
@@ -9,7 +29,7 @@ export const Loading: FC = () => {
         application!
       </p>
       <br />
-      <h3>Please wait...</h3>
+      <h3>{getProgress(initProgress)}</h3>
       <img
         style={{ marginTop: "1rem" }}
         src="../public/loading.svg"
