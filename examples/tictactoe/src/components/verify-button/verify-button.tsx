@@ -35,7 +35,7 @@ export const VerifyButton: FC<VerifyButtonProps> = ({
       <div style={{ display: "flex", flexDirection: "row", gap: "2rem" }}>
         <p>{getStatus()}</p>
         <button
-          className={"verifybutton"}
+          className="verifybutton"
           disabled={!gameFinished || assertionQueue.length > 0}
           onClick={() => {
             verify();
