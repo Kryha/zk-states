@@ -16,8 +16,4 @@ yarn dev
 
 # project structure
 
-The implementation of the library can be found in.
-`src/store/index.ts`
-In this file a store is created that contains the state of the game and the assertions that can be performed on the state. The store is created using the `createStore` function. This function takes a state object and a list of assertions. The state object is a simple object that contains the state of the game. The assertions are functions that take the state object and return a boolean. The assertions are used to check if the state is valid. The assertions are used to generate the proofs.
-
-When a player won the game and all the proofs are generated the verify button will be enabled. When the verify button is clicked the proofs will be verified. The application will verify the proofs using a zkApp deployed on the Mina Berkley testnet.
+The ```createZKState``` function allows us to define a global state by specifying values and actions. Actions are functions that will update the state. Before updating the state, we want to make sure that the new values satisfy all the criteria and game rules. This is where assertions come into play. Assertions are functions that will perform a local check on the provided values. If it fails, the assertion will interrupt the action, cancelling the state update. If all the assertions in an action succeed locally, the library will try to recursively generate a ZK proof for each one of these assertions in a worker thread. If one proof generation fails, the state will rollback to the previous valid state. Once the game is finished and all the assertions have been recursively proven, the “Verify” button will allow the player to verify the latest generated proof by calling the ```verify``` function. This function performs a remote call to the verifier deployed on the Mina Berkeley testnet which will check the validity of the latest recursive proof.
