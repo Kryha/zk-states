@@ -12,7 +12,7 @@ npm install zk-states
 yarn add zk-states
 ```
 
-> ⚠️ IMPORTANT: To properly execute the library, [Auro wallet](https://www.aurowallet.com/) extension has to be installed in the browser.
+> ⚠️ IMPORTANT: To approve transactions on Mina Network, [Auro wallet](https://www.aurowallet.com/) extension has to be installed in the browser.
 
 ## Defining a ZK state
 
