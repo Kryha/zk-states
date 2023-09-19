@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useZKStore } from "../store";
 import { calculateWinner } from "../util";
 
@@ -11,6 +12,12 @@ export const usePlayerturn = () => {
   const board = useZKStore((state) => state.board);
 
   const winner = calculateWinner(board);
+
+  useEffect(() => {
+    if (winner) {
+      setFinished(true);
+    }
+  }, [winner, setFinished]);
 
   const getPlayerIcon = (player: number) => {
     if (player === 2) {
@@ -38,10 +45,6 @@ export const usePlayerturn = () => {
       return;
     }
 
-    if (winner) {
-      setFinished(true);
-      return;
-    }
     updateBoard(i);
   };
 

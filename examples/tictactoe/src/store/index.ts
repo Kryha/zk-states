@@ -35,6 +35,7 @@ export const {
   useZKStore,
   useProof,
   useIsInitialized,
+  useVerify,
 } = createZKState<ZKState>(workerClient, (set) => ({
   board: new Array<PlayField>(9).fill(0),
   turnNumber: 0,

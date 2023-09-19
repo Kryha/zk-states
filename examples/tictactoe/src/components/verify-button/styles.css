@@ -1,0 +1,26 @@
+.verifybutton {
+  border-radius: 8px;
+  cursor: pointer;
+  border-color: #afa3d1;
+  border-width: 2px;
+  border-style: solid;
+  color: #afa3d1;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+}
+
+.verifybutton:hover {
+  background-color: #afa3d1;
+  color: #fff;
+}
+
+.verifybutton:disabled {
+  border-color: grey;
+  padding: 0.5rem 1rem;
+  border-width: 2px;
+  border-style: solid;
+  background-color: transparent;
+  color: grey;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
